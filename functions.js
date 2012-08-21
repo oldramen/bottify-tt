@@ -263,26 +263,12 @@ global.Enter = function(a) {
 };
 
 global.Loop = function() {
-	Notify();
 	CheckAFKs();
 	CheckAutos();
 	if(core.users.togreet.length) Greet(core.users.togreet);
 	if(core.users.tosave.length) SaveUsers(core.users.tosave);
 	if(core.saving) SaveSettings();
 	config.lastseen = Date.now();
-};
-
-global.Notify = function() {
-	if (!config.notify.on) return;
-	core.notify++;
-	var b = core.notify * 6;
-	if (b < config.notify.time * 60) return;
-	core.notify = 0;
-	core.seen++;
-	if (core.seen > 3) core.seen = 1;
-	if (core.seen == 1 && config.notify.one) return Say(config.notify.one);
-	if (core.seen == 2 && config.notify.two) return Say(config.notify.two);
-	if (core.seen == 3 && config.notify.three) return Say(config.notify.three);
 };
 
 global.CheckAFKs = function() {
@@ -430,7 +416,6 @@ global.HandlePM = function(a, b) {
 
 global.HandleCommand = function (d, c, f, z) {
 	if(!core.booted) return Log("Not booted, can't do commands");
-	if (c.indexOf(" && ") > -1) return HandleMultiple(d, c, f);
 	var sMatch = c.match(/^[!\*\/]/);
 	if(!sMatch && core.cmds.bare.indexOf(c) === -1) return Log("Can't find the command");
 	var sSplit = c.split(' ');
@@ -452,29 +437,6 @@ global.HandleCommand = function (d, c, f, z) {
 		}
 	});
 };
-
-global.HandleMultiple = function(a,b,c,z) {
-	Log("Handling multiple commands");
-	if (!core.user[a]) return Log("Not a user");
-	var d = b.split(' && ');
-	for (var i=0;i<d.length;i++) {
-		var e = d[i].split(' ');
-		var f = e.shift().replace(/^[!\*\/]/, "").toLowerCase();
-		var g = e.join(' ');
-		var h = commands.filter(function (j) {
-			return (j.command && j.command == f) || (typeof (j.command) == "object" && j.command.length && j.command.indexOf(f) > -1);
-		});
-		h.forEach(function (k) {
-			if (GetLevel(core.user[a]) < k.level && !(z && k.command == 'say')) return Log("Not high enough level to user");
-			if (g == 'hint' || g == 'help') return Say("/"+k.command+": "+k.hint, a, c);
-			k.callback(a, g, c, true);
-			if (core.user[d]) {
-			core.lastcmd = core.user[a].name+": /"+k.command+" "+g;
-			Log(core.lastcmd);
-		}
-		})
-	};
-}
 
 global.Follow = function(a) {
 	if (config.owns.indexOf(a) == -1) return;

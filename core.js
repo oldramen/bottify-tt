@@ -11,8 +11,7 @@ global.botti = {
 	util: require("util"),
 	_: require("underscore"),
 	mysql: require("mysql"),
-	db: require("./db.js").db,
-	menu: require("./menu.js")
+	db: require("./db.js").db
 };
 
 global.Log = function(a) {

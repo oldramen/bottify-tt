@@ -3,7 +3,7 @@ bottify-tt
 
 A bot for turntable.fm Half based on hashtag-amy. Fully coded on awesome.
 
-Linux Install Instructions:
+Install Instructions:
 
 Download.  
 Save.  
@@ -22,5 +22,8 @@ Google is your friend.
 Alias (on the fly command creations).  
 Economy (earn money by being active, spend it on stupid stuff).  
 Networking (easily access other rooms in the hosted family).  
+Toggles (/set limit 3 and /turn limit on are some examples).  
+Notifications (preset notifications that appear at intervals).  
+Run Multiple Commands (string commands together with &&).  
 
-If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://clients.yayramen.com/index.php/order)
+If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://clients.yayramen.com/index.php/order).
