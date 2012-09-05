@@ -26,4 +26,4 @@ Toggles (/set limit 3 and /turn limit on are some examples).
 Notifications (preset notifications that appear at intervals).  
 Run Multiple Commands (string commands together with &&).  
 
-If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://clients.yayramen.com/index.php/order).
+If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://yayramen.com/bots).
