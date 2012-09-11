@@ -183,10 +183,9 @@ global.RefreshMeta = function(a) {
 	core.currentsong = {name: "",up: -1,down: -1,heart: -1};
 	for(var i = 0, len = a.room.metadata.djs.length; i < len; ++i) {
 		core.djs[i] = a.room.metadata.djs[i];
-		if (!Crashed() && core.user[core.djs[i]]) core.user[core.djs[i]].count = 0;
 	};
 	core.currentdj = core.user[a.room.metadata.current_dj];
-	if(core.currentdj) core.currentdj.count++;
+	if(core.currentdj && core.currentdj.count < 1) core.currentdj.count++;
 	core.maxdjs = a.room.metadata.max_djs;
 	if(a.room.metadata.current_song) {
 		core.currentsong.up = a.room.metadata.upvotes;
@@ -317,13 +316,6 @@ global.SaveUsers = function(x) {
 global.SaveSettings = function(x,y) {
 	core.saving = false;
 	botti.db.save("settings");
-};
-
-global.Crashed = function() {
-	var s0 = Date.now() - config.lastseen;
-	var s1 = s0 / 60000;
-	if(s1 < 2) return true;
-	return false;
 };
 
 global.Remove = function(a) {
