@@ -401,10 +401,8 @@ global.AdvanceQueue = function() {
 		Say(msg, config.qued[0]);
 		core.qtimeout = setTimeout(function(){
 			config.qued.shift();
-			setTimeout(function() {
-				AdvanceQueue();
-				core.qtimeout = null;
-			}, 1000)
+			core.qtimeout = null;
+			AdvanceQueue();
 		}, config.queue.timeout * 1000)
 	}
 };
