@@ -26,4 +26,4 @@ Notifications (preset notifications that appear at intervals).
 Temporarily Ban Users (bans aren't saved to the db, and vanish on restart).  
 Ignore Users (Users who are being ignored can't interact with the bot).  
 
-If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://yayramen.com/bots).
+If you can't get this bot set up, you can get the hosted version for a small monthly fee [here](http://bots.yayramen.com/get).
