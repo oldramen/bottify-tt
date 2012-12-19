@@ -22,9 +22,7 @@ Google is your friend.
 Alias (on the fly command creations).  
 Economy (earn money by being active, spend it on stupid stuff).  
 Networking (easily access other rooms in the hosted family).  
-Toggles (/set limit 3 and /turn limit on are some examples).  
 Notifications (preset notifications that appear at intervals).  
-Run Multiple Commands (string commands together with &&).  
 Temporarily Ban Users (bans aren't saved to the db, and vanish on restart).  
 Ignore Users (Users who are being ignored can't interact with the bot).  
 
