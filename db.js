@@ -4,11 +4,6 @@
  * @description This is the db file, outlining all the db functions.     *
  *************************************************************************/
 
-Log("Connecting to DB");
-global.client = botti.mysql.createConnection({user: "root", password: "", database: "bots", host: "localhost", insecureAuth: true});
-botti.db.create("settings");botti.db.create("users");botti.db.create("songs");botti.db.create("retired");
-Log("Connected");
-
 db = function() {};
 
 db.strip = function(a) {
@@ -207,3 +202,9 @@ db.save = function(a, y, z) {
 };
 
 exports.db = db; 
+
+//Connect
+Log("Connecting to DB");
+global.client = botti.mysql.createConnection({user: "root", password: "", database: "bots", host: "localhost", insecureAuth: true});
+db.create("settings");db.create("users");db.create("songs");db.create("retired");
+Log("Connected");
