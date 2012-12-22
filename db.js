@@ -127,7 +127,7 @@ db.load = function(a, z) {
   		function(a, b, c) {
 				if (!b[0]) { core.user[z.userid] = db.create("user", z)}
 				else {
-					core.user[z.userid] = RefreshUser(db.parse(b[0].data), z);
+					core.user[z.userid] = basic.refreshuser(db.parse(b[0].data), z);
 				};
 				Log("Loaded "+z.name);
 			}
