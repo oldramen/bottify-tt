@@ -6,8 +6,8 @@
  * over what the bot says.																							 *
  *************************************************************************/
 
-config.msg = global.msg = {
-	booted: "/me flickered on.",
+global.msg = {
+	booted: "Hi! I'm a bot! Type /install to get started!",
 	dance: "Bust a move!",
 	party: "Gimme a shot and clear the dance floor!!",	
 	commands: "The list of commands are as follows: /{commands}",
@@ -136,8 +136,8 @@ config.msg = global.msg = {
 	}
 };
 
-config.greeting = {
-	on: true,
+msg.greeting = {
+	on: false,
 	locked: false,
 	user: "Hey {usernames}! Welcome to {room}! Type /help if you're lost.",
 	mod: "We've got a moderator in the room!  Welcome @{usernames}!",
@@ -146,9 +146,9 @@ config.greeting = {
 	pm: "Hey! I'm a bot. Keep this box open so you can give me /commands!"
 };
 
-config.dance = "Bust a move!";
+msg.dance = "Bust a move!";
 
-config.on = {
+msg.on = {
 	boot: "Hi! I'm a bot! Type /install to get started!",
 	adddj: null,
 	remdj: null,
@@ -179,3 +179,5 @@ config.on = {
 	unban: "{username} is now unbanned.",
 	banned: "You're banned.  Gtfo.",
 };
+
+config.msg = msg;config.on = msg.on;config.greeting = msg.greeting;config.dance = msg.dance;

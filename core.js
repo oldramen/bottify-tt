@@ -5,12 +5,20 @@
  *************************************************************************/
 
 global.Log = function(a) { console.log(config.name, ">>>", a + "."); };function puts(error, stdout, stderr) { sys.puts(stdout) };global.Module = {};Module.loaded = [];
-Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a); } Module.has = function(a) { return-1 < Module.loaded.indexOf(a) ? true : false };
+Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a);Log("Loaded Module: "+a); }; 
+global.settings = function(){}; settings.save = function(){  return core.saving = true; };
+Module.has = function(a) { 
+	var b = a.split(",");
+	for (var i = b.length - 1; i >= 0; i--) {
+		return-1 < Module.loaded.indexOf(b[i]) ? true : false
+	};
+};
 
-//Load Prereqs
+
+//Load Plugins
 global.botti = {
-	install: require("./install.js"), ttapi: require("ttapi"), util: require("util"), _: require("underscore"), mysql: require("mysql"), twit: require("twit"), 
-	lastfm: require("lastfm").LastFmNode, db: require("./db.js").db, sys: require('sys'), exec: require('child_process').exec
+	ttapi: require("ttapi"), util: require("util"), _: require("underscore"), mysql: require("mysql"), twit: require("twit"), 
+	lastfm: require("lastfm").LastFmNode, sys: require('sys'), exec: require('child_process').exec
 };
 
 //Define Tiers
@@ -32,9 +40,11 @@ global.bot = new botti.ttapi(config.auth, config.uid, config.room);
 Log("Connected");
 
 //Load Tiers
-for (var i=Tier;i>=0;i--) { for (var x=Tiers[i].length-1;x>=0;x--) { Module.load(Tiers[i][x]); }; };
+for (var i=0;i<=Tier;i++) { for (var x=0;x<Tiers[i].length;x++) { Module.load(Tiers[i][x]); }; };
 
 //Load Modules
-for (x in Modules) { if (x == 1) Module.load(x); };
+for (var x in Modules) { if (Modules[x] == 1) Module.load(x); };
 
+//Load Files
+botti.install = require("./install.js");botti.db = require("./db.js").db;
 //Compatibility

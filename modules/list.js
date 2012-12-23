@@ -10,7 +10,7 @@ global.list = function(){};
 list.update = function(){ var a = false;
 	config.hasOwnProperty("whitelist") || (config.whitelist = false, a = true);
 	config.hasOwnProperty("list") || (config.list = [], a = true);
-	a && basic.save("settings");
+	a && settings.save();
 	commands = botti._.union(commands, list.commands);
 };
 
@@ -18,15 +18,15 @@ list.adddj = function(b) {
   var a = core.user[b.user[0].userid];
   if(a) { 
     if(config.whitelist && -1 === config.list.indexOf(a.userid)) {
-      return bot.remDj(a.userid), Log(a.name + " was escorted: not on whitelist"), basic.say(msg.whitelist.notin, a.userid, !0)
+      return bot.remDj(a.userid), Log(a.name + " was escorted: not on whitelist"), basic.say(msg.whitelist.notin, a.userid, true)
     }
     a.droppedRoom = config.room;basic.updateidle(a);basic.save(a);Log(a.name + " started DJing");basic.say(config.on.adddj, b.user[0].userid);basic.refreshdjs();
     core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (b = core.djs.indexOf(core.currentdj.userid), b = b == core.djs.length - 1 ? 0 : b + 1, 
-    	core.nextdj = core.user[core.djs[b]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, !0))
+    	core.nextdj = core.user[core.djs[b]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true))
   }
 };
 
-list.add = function(a) { -1 === config.list.indexOf(a.userid) && config.list.push(a.userid);basic.say(msg.whitelist.add, a.userid);basic.save("settings") };
+list.add = function(a) { -1 === config.list.indexOf(a.userid) && config.list.push(a.userid);basic.say(msg.whitelist.add, a.userid);settings.save(); };
 
 //Hook Events
 bot.on('booted', list.update);
@@ -40,19 +40,19 @@ list.commands = [{
 	  if("add" == b) { if(!a) { return } var c = basic.find(a);c && list.add(c) }
 	  if("remove" == b) { if(!a) { return }
 	    if((c = basic.find(a)) && -1 !== config.list.indexOf(c.userid)) {
-	      return config.list.splice(config.list.indexOf(c.userid), 1), basic.say(config.msg.whitelist.remove, c.userid, d), basic.save("settings")
+	      return config.list.splice(config.list.indexOf(c.userid), 1), basic.say(config.msg.whitelist.remove, c.userid, d), settings.save();
 	    }
 	    if(1 > config.list.length) return basic.say("There aren't any whitelisted users here.", x, z);
 	    d = [];for(a = 0;a < config.list.length;a++) { d.push('(SELECT name FROM users WHERE id = "' + config.list[a] + '") as ab' + a) }
 	    client.query("SELECT " + d.join(", "), function(a) { if(a) { return console.log(a) }
 	      for(a = 0;a < config.list.length;a++) {
 	        if(console.log(botti.db.strip(eval("b[0].ab" + a)), y), botti.db.strip(eval("b[0].ab" + a)) == y) {
-	          config.list.splice(a, 1);var b = config.msg.whitelist.remove.replace("{username}", y);basic.say(b, x, z);basic.save("settings")
+	          config.list.splice(a, 1);var b = config.msg.whitelist.remove.replace("{username}", y);basic.say(b, x, z);settings.save();
 	        }
 	      }
 	    })
 	  }
-	  "add" != b && "remove" != b && basic.say("Useage: /whitelist clear to clear, /whitelist add @username, /whitelist remove @username [Mod Command] /whitelisted to list [Everyone].", e, !0)
+	  "add" != b && "remove" != b && basic.say("Useage: /whitelist clear to clear, /whitelist add @username, /whitelist remove @username [Mod Command] /whitelisted to list [Everyone].", e, true)
 	},
   mode: 2,level: 3,hint: '/whitelist add @user; /whitelist remove @user'
 }, {

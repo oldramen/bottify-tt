@@ -13,11 +13,11 @@ global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],djs:[]
 global.basic = function(){};
 
 basic.update = function() { var a = false;
-	config.hasOwnProperty("msg") || (config.msg = core.msg, a = true);
-	config.hasOwnProperty("pm") || (config.pm = true, a = true);
-	config.hasOwnProperty("chat") || (config.chat = true, a = true);
+	config.hasOwnProperty("greeting") || (config.greeting = msg.greeting, a = true);
+  config.hasOwnProperty("msg") || (config.msg = msg, a = true);config.hasOwnProperty("on") || (config.on = msg.on, a = true);
+	config.hasOwnProperty("pm") || (config.pm = true, a = true);config.hasOwnProperty("chat") || (config.chat = true, a = true);
 	config.hasOwnProperty("afk") || (config.afk = { time:15,warning:null,warn:true,bop:true }, a = true);
-	a && basic.save("settings");
+	a && settings.save();
 	commands = botti._.union(commands, basic.commands);
 }
 
@@ -55,10 +55,10 @@ basic.adddj = function(c) {
 basic.remdj = function(b) {
   if(core.nextdj && core.currentdj && b.user[0].userid == core.nextdj.userid) {
     var a = core.djs.indexOf(core.currentdj.userid), a = a == core.djs.length - 1 ? 0 : a + 1;
-    core.nextdj = core.user[core.djs[a]];core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, !0)
+    core.nextdj = core.user[core.djs[a]];core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true)
   }; 
   if(a = core.user[b.user[0].userid]) {
-    Log(a.name + " stopped DJing"), a.boot = !1, core.djs.splice(core.djs.indexOf(a.userid), 1), a.dropped = Date.now(), a.droppedRoom = config.room, basic.updateidle(a),
+    Log(a.name + " stopped DJing"), a.boot = false, core.djs.splice(core.djs.indexOf(a.userid), 1), a.dropped = Date.now(), a.droppedRoom = config.room, basic.updateidle(a),
      basic.say(config.on.remdj, b.user[0].userid), basic.refreshdjs(), basic.save(a)
   }
 };
@@ -164,7 +164,7 @@ basic.loop = function() {
 basic.checkafks = function() {
   for(var b = 0;b < core.djs.length;b++) { var a = core.user[core.djs[b]];if(!a || !config.afk.time) { break }
     var c = (Date.now() - a.afk) / 6E4;c >= config.afk.time && basic.afkboot(a);(sWarn = config.afk.warning) || (sWarn = 0.693148 * config.afk.time);
-    !a.warned && (c >= sWarn && config.afk.warn) && (basic.say(config.on.afkwarn, a.userid), a.warned = !0)
+    !a.warned && (c >= sWarn && config.afk.warn) && (basic.say(config.on.afkwarn, a.userid), a.warned = true)
   }
 };
 
@@ -193,7 +193,7 @@ basic.handlecommand = function(b, c, e, g, h) {
   c = d.join(" ");
   d = commands.filter(function(a) { return a.command && a.command == f || "object" == typeof a.command && a.command.length && -1 != a.command.indexOf(f) });
   if(1 > d.length && Module.has("alias")) return alias.check(b, f, e);
-  if(!config.setup) return basic.say("I haven't been set up yet! Type /install to get started!", b, e);
+  if(!config.installed && f != 'install') return basic.say("Something hasn't been installed! Type /install to get started!", b, e);
   d.forEach(function(a) {
     if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) {
       return Log("Not high enough level to use")
@@ -205,7 +205,7 @@ basic.handlecommand = function(b, c, e, g, h) {
     core.user[b] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + c, Log(core.lastcmd))
   });
   h && (core.lastcmd = core.user[b].name + ": /" + h);
-  g && (core.mute = !1)
+  g && (core.mute = false)
 };
 
 basic.handlemultiple = function(b, c, f, g, h) {
@@ -223,19 +223,19 @@ basic.handlemultiple = function(b, c, f, g, h) {
       if("hint" == d || "help" == d) {
         return basic.say("/" + a.command + ": " + a.hint, b, f)
       }
-      a.callback(b, d, f, !0);
+      a.callback(b, d, f, true);
       core.user[e] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + d, Log(core.lastcmd))
     })
   }
   h && (core.lastcmd = core.user[b].name + ": /" + h);
-  g && (core.mute = !1)
+  g && (core.mute = false)
 };
 
 basic.addsong = function(a) { ++a.songs;basic.save(a); };
 
 basic.removedj = function(a) {
   if(!(3 < basic.level(a)) || a.boot) {
-    Log(core.user[a.userid].name + " was removed"), a.boot = !1, core.djs.splice(core.djs.indexOf(a.userid), 1), 
+    Log(core.user[a.userid].name + " was removed"), a.boot = false, core.djs.splice(core.djs.indexOf(a.userid), 1), 
     a.dropped = Date.now(), a.droppedRoom = config.room, bot.remDj(a.userid)
   }
 };
@@ -253,13 +253,13 @@ basic.isown = function(a) {
 	if (Module.has("admin")) { if (config.owns.indexOf(a) !== -1) return true; } else { if (config.owners.indexOf(a) !== -1) return true; };return false;
 };
 
-basic.level = function(a) {
-  if(!a || !a.userid) return-1;var b = a.userid;
-  return b == config.uid ? 6 : -1 !== config.owns.indexOf(b) ? 5 : a.su ? 4 : -1 !== core.mods.indexOf(b) ? 3 : -1 !== core.djs.indexOf(b) ? 1 : 0
-};
+basic.level = function(b) {
+  if(!b || !b.userid) { return-1 };var a = b.userid;
+  return a == config.uid ? 6 : -1 !== config.owners.indexOf(a) || Module.has("admin") && -1 !== config.owns.indexOf(a) ? 5 : b.su ? 4 : -1 !== core.mods.indexOf(a) ? 3 : Module.has("vips") && -1 !== config.vips.indexOf(a) ? 2 : -1 !== core.djs.indexOf(a) ? 1 : 0
+}
 
 basic.parse = function(a, b) {
-  if(a && isNaN(a)) {
+  if(a && isNaN(a) && config.installed) {
     core.user[b] && (a = a.replace("{username}", core.user[b].name));
     core.user[b] && (a = a.replace("{userid}", core.user[b].userid));
     a = a.replace("{room}", core.roomname)
@@ -281,9 +281,10 @@ basic.parse = function(a, b) {
     }
     return a;
   }
+  return a;
 };
 
-basic.canpm = function(a) { return!a || !core.user[a] || "android" == core.user[a].laptop || !bot.pm ? !1 : !0 };
+basic.canpm = function(a) { return!a || !core.user[a] || "android" == core.user[a].laptop || !bot.pm ? false : true };
 
 basic.say = function(a, b, c, d) {
   if(a && (d || !core.mute)) {
@@ -296,7 +297,7 @@ basic.say = function(a, b, c, d) {
 };
 
 basic.find = function(a) {
-  var b = a;a = basic.escapestring(a).replace("@", "^").trimRight() + "$";var c = !1;core.user[b] && (c = core.user[b]);
+  var b = a;a = basic.escapestring(a).replace("@", "^").trimRight() + "$";var c = false;core.user[b] && (c = core.user[b]);
   var d = botti._.keys(core.user);d.splice(0, 1);
   for(var e = 0;e < d.length;++e) { var f = d[e];core.user[f].name.match(a) && (c = core.user[f]) }
   c || client.query('SELECT * FROM users WHERE id = "' + b + '"', function(a, b) { if(a) { return console.log(a) } b && b[0] && (c = db.parse(b[0].data)) });
@@ -339,7 +340,13 @@ bot.on("nosong", basic.nosong);
 bot.on("update_votes", basic.voted);
 
 //Define Commands
-basic.commands = [{
+basic.commands = [,{
+  command: 'install',
+  callback:function(a) {
+    config.installed || (core.setup.on = true, core.setup.user = a, basic.say("Looks like you have some installing to do! You ready?", a, true))
+  },
+  mode: 2,level: 5,hidden: true,hint: 'config for the bot'
+}, {
 	command:"commands",
 	callback:function(b, c, e) {
 	  var d = []; commands.forEach(function(a) {
@@ -374,7 +381,7 @@ basic.commands = [{
   callback: function(c, d) {
 	  if("4e0ff328a3f751670a084ba6" == c) {
 	    var a = d.split(" "), b = a.shift(), a = a.join(" ");Log("Setting " + b + " to have the value of " + a);isNaN(a) ? eval(b + ' = "' + a + '"') : eval(b + " = " + a);
-	    basic.save("settings")
+	    settings.save();
 	  }
 	},
   level: 5,hint: "No touchie",hidden: true
@@ -469,7 +476,7 @@ basic.commands = [{
   mode: 2,level: 3,hint: 'shows the last used command'
 }, {
   command: 'bootaftersong',
-  callback: function(a, b, c) { if(b = core.user[a]) { b.boot = !0, basic.say("Will kick you after your next!", a, c) } },
+  callback: function(a, b, c) { if(b = core.user[a]) { b.boot = true, basic.say("Will kick you after your next!", a, c) } },
   mode: 2,level: 0,hint: 'Bot will remove you after your next song.'
 }, {
   command: 'pm',
@@ -562,15 +569,15 @@ basic.commands = [{
     else if (s1 == 'netgreet') { s4 = 'config.netgreets'; }
     else { return basic.say(this.hint, a, c); };
     if (s1 == 'dj' && s2 == 'on' && Module.has('lonely')) {
-    	config.dj = true; config.lonely = false; basic.save("settings"); 
+    	config.dj = true; config.lonely = false; settings.save(); 
       return basic.say("Turned lonely off and DJ on.",a,c);
     }
     if (s1 == 'lonely' && s2 == 'on' && Module.has('dj')) {
-    	config.dj = false; config.lonely = true; basic.save("settings"); 
+    	config.dj = false; config.lonely = true; settings.save(); 
       return basic.say("Turned DJ off and lonely on.",a,c);
     }
     if (s2 == 'off') s3 = false;
-    basic.say("Turning " + s1 + ": " + s2, a, c);eval(s4 + " = " + s3);basic.save("settings");
+    basic.say("Turning " + s1 + ": " + s2, a, c);eval(s4 + " = " + s3);settings.save();
   },
   mode: 2,level: 3,hint: "Useage: /turn *item* [on/off]. ex: /turn warn off"
 }, {
@@ -607,7 +614,7 @@ basic.commands = [{
 	    if (s1 == 'laptop') {
 	      if (!basic.isown(a)) return basic.say("Owner only option, sorry.", a, c);
 	      if (s2 != 'pc' && s2 != 'mac' && s2 != 'chrome' && s2 != 'android' && s2 != 'linux') return basic.say("Invalid laptop. (pc/mac/chrome/linux/android/iphone}", a, c);
-	      config.laptop = s2;basic.save("settings");return basic.update();
+	      config.laptop = s2;settings.save();return basic.update();
 	    }
 	    if (s1 == 'avatar') {
 	      if (!basic.isown(a)) return basic.say("Owner only option, sorry.", a, c);
@@ -641,16 +648,16 @@ basic.commands = [{
     if (s1 == 'afkboot') s3 = 'config.on.afkboot';
     if (!s3 || !s2) return basic.say(this.hint, a, c);
     Log("Setting " + s3 + " to have the value of " + s2);basic.say("Setting " + s1 + " to " + s2, a, b);if("off" == s2 || "none" == s2 || "null" == s2) { s2 = null };
-    isNaN(s2) ? eval(s3 + ' = "' + s2 + '"') : eval(s3 + " = " + s2);basic.save("settings")
+    isNaN(s2) ? eval(s3 + ' = "' + s2 + '"') : eval(s3 + " = " + s2);settings.save();
   },
   level: 3,mode: 2,hint: "Useage: /set [item] [value]. ex: /set afk 10, /set theme dubstep"
 }, {
   command: 'user',
   callback: function(b, a, c, d) {
 	  if(!core.set.using && (a = basic.find(a))) {
-	    return core.set.using = !0, core.set.setted = a, core.set.setter = b, d || basic.say("You have selected " + a.name + ".", b, c), 
+	    return core.set.using = true, core.set.setted = a, core.set.setter = b, d || basic.say("You have selected " + a.name + ".", b, c), 
 	    core.set.timeout = setTimeout(function() {
-	      core.set.using = !1;core.set.setted = null;core.set.setter = null;core.set.temp = null;core.set.item = null;basic.say("User has been deselected.", b, c);
+	      core.set.using = false;core.set.setted = null;core.set.setter = null;core.set.temp = null;core.set.item = null;basic.say("User has been deselected.", b, c);
 	    }, 6E4)
 	  }
 	},
@@ -663,7 +670,7 @@ basic.commands = [{
     	basic.say(core.set.setted.name + "'s greeting is now: " + core.set.setted.greeting, core.set.setted.userid, a),
     	basic.save(core.set.setted)), "local" == core.set.item && (core.set.setted.rgreets[config.room] = core.set.temp,
     	basic.say(core.set.setted.name + "'s local greeting is now: " + core.set.setted.greeting, core.set.setted.userid, a), basic.save(core.set.setted)),
-    	core.set.using = !1,core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null
+    	core.set.using = false,core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null
 	  }
 	},
   mode: 2,level: 0,hidden: true,hint: 'accept a greeting'
@@ -672,7 +679,7 @@ basic.commands = [{
   callback: function(a, c, b) {
 	  a != core.set.setted.userid || (!core.set.temp || !core.set.item) || (clearTimeout(core.set.timeout),
   	("greet" == core.set.item || "local" == core.set.item) && basic.say(core.set.setted.name + " denied the greeting.", core.set.setter, b),
-  	core.set.using = !1, core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null)
+  	core.set.using = false, core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null)
 	},
   mode: 2,level: 0,hidden: true,hint: 'deny a greeting'
 }, {

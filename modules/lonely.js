@@ -9,14 +9,14 @@ global.lonely = function(){};
 
 lonely.update = function(){ var a = false;
 	config.hasOwnProperty("lonely") || (config.lonely = true,a = false);
-	a && basic.save("settings");core.lonely = false;
+	a && settings.save();core.lonely = false;
 	lonely.check();
 };
 
 lonely.check = function() {
   if((!Module.has("queue") || !config.qued.length) && config.lonely) {
-    if(1 == core.djs.length && -1 == core.djs.indexOf(config.uid)) { bot.addDj(), core.lonely = !0 } else {
-      if((2 < core.djs.length || 1 == core.djs.length) && -1 != core.djs.indexOf(config.uid)) { bot.remDj(), core.lonely = !1 }
+    if(1 == core.djs.length && -1 == core.djs.indexOf(config.uid)) { bot.addDj(), core.lonely = true } else {
+      if((2 < core.djs.length || 1 == core.djs.length) && -1 != core.djs.indexOf(config.uid)) { bot.remDj(), core.lonely = false }
     }
   }
 };

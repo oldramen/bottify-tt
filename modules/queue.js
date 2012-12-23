@@ -10,7 +10,7 @@ global.queue = function(){};
 queue.update = function(){ var a = false;
 	config.hasOwnProperty("queue") || (config.queue = { on:false,enforce:true,timeout:15 }, a = true);
 	config.hasOwnProperty("qued") || (config.qued = [], a = true);
-	a && basic.save("settings");queue.refine();
+	a && settings.save();queue.refine();
 	commands = botti._.union(commands, queue.commands);
 };
 
@@ -19,7 +19,7 @@ queue.adddj = function(a) {
   if((!config.queue.on || queue.guarantee(b)) && b && !Module.has("limit,list")) {
     b.droppedRoom = config.room, basic.updateidle(b), basic.save(b), Log(b.name + " started DJing"), basic.say(config.on.adddj, a.user[0].userid), basic.refreshdjs(), 
     core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (a = core.djs.indexOf(core.currentdj.userid), a = a == core.djs.length - 1 ? 0 : a + 1, 
-    	core.nextdj = core.user[core.djs[a]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, !0))
+    	core.nextdj = core.user[core.djs[a]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true))
   }
 };
 
@@ -48,13 +48,13 @@ queue.guarantee = function(a) {
 queue.advance = function() {
   if(config.queue.on && 0 < config.qued.length && !core.qtimeout) {
     var a = config.on.queue.next.replace("{queuetimeout}", config.queue.timeout);basic.say(a, config.qued[0]);
-    1 < config.qued.length && config.on.firstinqueue && basic.say(config.on.firstinqueue, config.qued[1], !0);
+    1 < config.qued.length && config.on.firstinqueue && basic.say(config.on.firstinqueue, config.qued[1], true);
     core.qtimeout = setTimeout(function() { config.qued.shift();core.qtimeout = null;queue.advance() }, 1E3 * config.queue.timeout)
   }
 };
 
 queue.parse = function(a,b) {
-	if (!a || !isNaN(a)) return;
+	if (!a || !isNaN(a) || config.installedmods.indexOf('queue') < 0) return a;
 	a = a.replace('{queue}', basic.lightswitch(config.queue.on))
 	.replace('{queueon}', basic.lightswitch(config.queue.on));
 	return a;
@@ -65,7 +65,7 @@ bot.on('booted', queue.update);
 bot.on('looped', queue.autos);
 bot.on('removed', queue.refine);
 bot.on('add_dj', queue.adddj);
-bot.on('rem_dj'. queue.advance);
+bot.on('rem_dj', queue.advance);
 
 //Define Commands
 queue.commands = [{
@@ -75,7 +75,7 @@ queue.commands = [{
 	  if(-1 !== config.qued.indexOf(a)) return basic.say(config.msg.queue.alreadyin, a, b);
 	  if(-1 !== core.djs.indexOf(a)) return basic.say(config.msg.queue.dj, a, b);
 	  if(core.djs.length < core.maxdjs && !config.qued.length) return basic.say(config.queue.open, a, b);
-	  config.qued.push(a);basic.save("settings");basic.say(config.msg.queue.add, a, b)
+	  config.qued.push(a);settings.save();basic.say(config.msg.queue.add, a, b)
 	},
   mode: 2,level: 0,bare: true,hint: 'Adds user to the queue'
 }, {
@@ -83,7 +83,7 @@ queue.commands = [{
   callback: function(a, c, b) {
 	  if(!config.queue.on) return basic.say(config.msg.queue.off, a, b);
 	  if(-1 == config.qued.indexOf(a)) return basic.say(config.msg.queue.notin, a, b);
-	  config.qued.splice(config.qued.indexOf(a), 1);basic.save("settings");basic.say(config.msg.queue.remove, a, b)
+	  config.qued.splice(config.qued.indexOf(a), 1);settings.save();basic.say(config.msg.queue.remove, a, b)
 	},
   mode: 2,level: 0,bare: true,hint: 'Removes user from the queue'
 }, {
@@ -101,8 +101,8 @@ queue.commands = [{
   command: 'push',
   callback: function(c, b) {
 	  var a = basic.find(b);
-	  a && (-1 !== config.qued.indexOf(a.userid) && config.qued.splice(config.qued.indexOf(a.userid), 1), config.qued.unshift(a.userid), basic.save("settings"),
-	  basic.say(config.msg.queue.modadd, a.userid, !1));config.qued.unshift()
+	  a && (-1 !== config.qued.indexOf(a.userid) && config.qued.splice(config.qued.indexOf(a.userid), 1), config.qued.unshift(a.userid), settings.save(),
+	  basic.say(config.msg.queue.modadd, a.userid, false));config.qued.unshift()
 	},
   mode: 2,level: 3,hint: 'pushes user to the front of the queue'
 }, {
@@ -110,8 +110,8 @@ queue.commands = [{
   callback: function(c, b) {
 	  if("all" == b) return config.qued = [], basic.say("Cleared the queue");
 	  var a = basic.find(b);
-	  if(a) { if(-1 == config.qued.indexOf(a.userid)) { return } config.qued.splice(config.qued.indexOf(a.userid), 1);basic.save("settings");
-	  	basic.say(config.msg.queue.modremove, a.userid, !1)
+	  if(a) { if(-1 == config.qued.indexOf(a.userid)) { return } config.qued.splice(config.qued.indexOf(a.userid), 1);settings.save();
+	  	basic.say(config.msg.queue.modremove, a.userid, false)
 	  };config.qued.unshift();
 	},
   mode: 2,level: 3,hint: 'pushes user to the front of the queue'

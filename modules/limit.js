@@ -9,16 +9,16 @@ global.limit = function(){};
 
 limit.update = function(){ var a = false;
 	config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false }, a = true);
-	a && basic.save("settings");
+	a && settings.save();
 	commands = botti._.union(commands, limit.commands);
 };
 
 limit.adddj = function(b) {
   var a = core.user[b.user[0].userid];limit.waited(a) && (a.waiting = a.count = 0);
-  if(config.songs.waits && 0 < a.waiting) return bot.remDj(a.userid), Log(a.name + " was escorted: song wait"), basic.say(msg.waitlimit, a.userid, !0);
+  if(config.songs.waits && 0 < a.waiting) return bot.remDj(a.userid), Log(a.name + " was escorted: song wait"), basic.say(msg.waitlimit, a.userid, true);
   a && !Module.has("list") && (a.droppedRoom = config.room, basic.updateidle(a), basic.save(a), Log(a.name + " started DJing"), basic.say(config.on.adddj, 
   	b.user[0].userid), basic.refreshdjs(), core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (b = core.djs.indexOf(core.currentdj.userid), 
-  	b = b == core.djs.length - 1 ? 0 : b + 1, core.nextdj = core.user[core.djs[b]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, !0)))
+  	b = b == core.djs.length - 1 ? 0 : b + 1, core.nextdj = core.user[core.djs[b]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true)))
 };
 
 limit.endsong = function() {
@@ -93,10 +93,10 @@ limit.commands = [{
   callback: function(b, a, c) {
   if(core.set.using && b == core.set.setter) {
     clearTimeout(core.set.timeout);core.set.timeout = null;if(isNaN(a)) { 
-      return core.set.using = !1, core.set.setted = null, core.set.setter = null, basic.say("Use your numbers, foo.")
+      return core.set.using = false, core.set.setted = null, core.set.setter = null, basic.say("Use your numbers, foo.")
     }
     500 < a && (a = 500);core.set.setted.count = a;basic.say("Set " + core.set.setted.name + " to " + a + " songs.", b, c);
-    basic.save(core.set.setted);core.set.using = !1;core.set.setted = null;core.set.setter = null
+    basic.save(core.set.setted);core.set.using = false;core.set.setted = null;core.set.setter = null
   }
 },
   mode: 2,level: 5,hint: "Sets songs for a user"
