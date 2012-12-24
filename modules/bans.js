@@ -20,11 +20,11 @@ bans.check = function(c) {
   };
 };
 
-bans.registered = function(a) { bans.check(a.user); };
+bans.registered = function(a) { if (core.booted) bans.check(a.user); };
 
 bans.add = function(a) {
   2 < basic.level(a) || (-1 === config.bans.indexOf(a.userid) && config.bans.push(a.userid), bot.bootUser(a.userid, config.on.banned), 
-  	basic.say(config.on.ban, a.userid), Log(core.user[a.userid].name + " was banned"), settings.save();)
+  	basic.say(config.on.ban, a.userid), Log(core.user[a.userid].name + " was banned"), settings.save())
 };
 
 //Hook Events

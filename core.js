@@ -7,12 +7,7 @@
 global.Log = function(a) { console.log(config.name, ">>>", a + "."); };function puts(error, stdout, stderr) { sys.puts(stdout) };global.Module = {};Module.loaded = [];
 Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a);Log("Loaded Module: "+a); }; 
 global.settings = function(){}; settings.save = function(){  return core.saving = true; };
-Module.has = function(a) { 
-	var b = a.split(",");
-	for (var i = b.length - 1; i >= 0; i--) {
-		return-1 < Module.loaded.indexOf(b[i]) ? true : false
-	};
-};
+Module.has = function(a) { var b = a.split(",");for (var i = b.length - 1; i >= 0; i--) { return-1 < Module.loaded.indexOf(b[i]) ? true : false }; };
 
 
 //Load Plugins

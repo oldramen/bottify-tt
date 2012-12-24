@@ -390,11 +390,11 @@ basic.commands = [,{
   callback: function(e, d, f) {
 	  if(1 > core.mods.length) return basic.say("There aren't any mods. Hrm, something's wrong.", e, f);
 	  d = [];for(var a = core.mods.length - 1;0 <= a;a--) { d.push('(SELECT name FROM users WHERE id = "' + core.mods[a] + '") as ab' + a) }
-	  client.query("SELECT " + d.join(", "), function(b) {
-	    if(b) { return console.log(b) } var c = [];b = 0;
-	    for(var a = core.mods.length - 1;0 <= a;a--) { eval("b[0].ab" + a) ? c.push(botti.db.strip(eval("b[0].ab" + a))) : b++ }
-	    c = "Mods: " + c.join(", ");0 < b && (c = c + ", and " + b + " more.");basic.say(c, e, f)
-	  })
+    
+    client.query("SELECT " + d.join(", "), function(a, b, c) { if (a) return console.log(a);var t = [];var s = 0;
+      for (var i = core.mods.length - 1; i >= 0; i--) {if (eval('b[0].ab'+i)) { t.push(botti.db.strip(eval('b[0].ab'+i))); }
+      else { s++ }; };var phrase = "Mods: " + t.join(", ");if (s > 0) phrase = phrase + ", and "+s+" more.";basic.say(phrase, e, f);
+    })
 	},
   mode: 2,level: 0,hint: 'lists mods'
 }, {
@@ -409,10 +409,10 @@ basic.commands = [,{
 	  var d = config.owners;Module.has("admin") && (d = config.owns);
 	  if(1 > d.length) return basic.say("There aren't any owners. Hrm, something's wrong.", f, g);
 	  e = [];for(var a = d.length - 1;0 <= a;a--) { e.push('(SELECT name FROM users WHERE id = "' + d[a] + '") as ab' + a) }
-	  client.query("SELECT " + e.join(", "), function(b) { if(b) { return console.log(b) } var c = [];b = 0;
-	    for(var a = d.length - 1;0 <= a;a--) { eval("b[0].ab" + a) ? c.push(botti.db.strip(eval("b[0].ab" + a))) : b++ }
-	    c = "Owners: " + c.join(", ");0 < b && (c = c + ", and " + b + " more.");basic.say(c, f, g)
-	  })
+	  client.query("SELECT " + e.join(", "), function(a, b, c) { if (a) return console.log(a);var t = [];var s = 0;
+      for (var i = d.length - 1; i >= 0; i--) {if (eval('b[0].ab'+i)) { t.push(botti.db.strip(eval('b[0].ab'+i))); }
+      else { s++ }; };var phrase = "Owners: " + t.join(", ");if (s > 0) phrase = phrase + ", and "+s+" more.";basic.say(phrase, f, g);
+    })
 	},
   mode: 2,level: 0,hint: 'lists owners'
 }, {

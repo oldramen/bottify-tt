@@ -40,7 +40,7 @@ limit.over = function(a) {
 };
 
 limit.parse = function(a,b) {
-	if (!a || !isNaN(a)) return;
+	if (!a || !isNaN(a) || config.installedmods.indexOf('limit') < 0) return a;
 	a = a.replace('{limits}', basic.lightswitch(config.songs.on))
 	.replace('{limit}', basic.lightswitch(config.songs.on))
 	.replace('{songlimit}', basic.lightswitch(config.songs.on))
