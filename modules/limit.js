@@ -11,6 +11,8 @@ limit.update = function(){ var a = false;
 	config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false }, a = true);
 	a && settings.save();
 	commands = botti._.union(commands, limit.commands);
+  var bcmds = limit.commands.filter(function(e){ return e.bare == true; });
+  if(!bcmds) core.cmds.bare += []; else core.cmds.bare += bcmds.map(function(e){ return e.command; });
 };
 
 limit.adddj = function(b) {
@@ -22,6 +24,7 @@ limit.adddj = function(b) {
 };
 
 limit.endsong = function() {
+  if (!config.installdone) return;
   for(var b in core.user) { var a = core.user[b];0 < a.waiting && --a.waiting;!basic.isdj(a.userid) && 0 >= a.waiting && (a.waiting = 0, a.count = 0) }
   Module.has("vips") || core.currentdj && core.djs.length >= config.songs.mindj && config.songs.on && core.currentdj.count >= config.songs.max && limit.over(core.currentdj)
 };

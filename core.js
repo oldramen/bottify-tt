@@ -18,9 +18,9 @@ global.botti = {
 
 //Define Tiers
 global.Tiers = [
-	['basic','stats'],           //Tier 0
+	['basic','stats','dj'],           //Tier 0
 	['bans','econ'],             //Tier 1
-	['queue','limit','dj'],      //Tier 2
+	['queue','limit','dynamic'],      //Tier 2
 	['admin','lonely','notify'], //Tier 3
 	['vips','list','retire'],    //Tier 4
 	['alias','twit','last']      //Tier 4

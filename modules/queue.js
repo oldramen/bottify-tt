@@ -12,6 +12,8 @@ queue.update = function(){ var a = false;
 	config.hasOwnProperty("qued") || (config.qued = [], a = true);
 	a && settings.save();queue.refine();
 	commands = botti._.union(commands, queue.commands);
+  var bcmds = queue.commands.filter(function(e){ return e.bare == true; });
+  if(!bcmds) core.cmds.bare += []; else core.cmds.bare += bcmds.map(function(e){ return e.command; });
 };
 
 queue.adddj = function(a) {

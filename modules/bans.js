@@ -12,6 +12,8 @@ bans.update = function(){ var a = false;
 	a && settings.save();
 	bot.roomInfo(function(a){ bans.check(a.users); });
 	commands = botti._.union(commands, bans.commands);
+  var bcmds = bans.commands.filter(function(e){ return e.bare == true; });
+  if(!bcmds) core.cmds.bare += []; else core.cmds.bare += bcmds.map(function(e){ return e.command; });
 };
 
 bans.check = function(c) {

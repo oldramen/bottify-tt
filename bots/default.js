@@ -4,24 +4,23 @@
  * @description This is the config file, which contains the setup values.*
  *************************************************************************/
 
-global.Tier = 2;
+global.Tier = 0;
 
 global.Modules = {
- 	stats:  0,
- 	bans:   0,
- 	econ:   0,
- 	queue:  0,
- 	limit:  0,
- 	admin:  0,
- 	lonely: 0,
- 	alias:  0,
- 	vips:   0,
- 	list:   0,
- 	twit:   0,
- 	last:   0,
- 	retire: 0,
- 	notify: 0,
- 	dj:     0
+ 	bans:   0, //paid
+ 	econ:   0, //paid
+ 	queue:  0, //paid
+ 	limit:  0, //paid
+ 	admin:  0, //paid
+ 	lonely: 0, //free
+ 	alias:  0, //paid
+ 	vips:   0, //paid
+ 	list:   0, //paid
+ 	twit:   0, //paid
+ 	last:   0, //paid
+ 	retire: 0, //paid
+ 	notify: 0, //paid
+ 	dj:     0  //free
  };
 
 global.config = {
@@ -35,7 +34,9 @@ global.config = {
 	laptop: "chrome",
 	theme: "EDM",
 
-	owners: ['4e0ff328a3f751670a084ba6']
+	owners: ['4e0ff328a3f751670a084ba6'],
+
+	installdone: false
 };
 
 require("../phrases.js");

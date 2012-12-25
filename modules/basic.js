@@ -5,7 +5,7 @@
  *************************************************************************/
 
 //Define the core object
-global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],djs:[],left:[],leaving:{},auto:[] },nextdj:null,currentdj:null,cmds:{ bare:[],pm:[] },
+global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],left:[],leaving:{},auto:[] },djs:[],nextdj:null,currentdj:null,cmds:{ bare:[],pm:[] },
 								setup:{ on:false,user:null },currentsong:{ name: "",up:-1,down:-1,heart:-1 },
 								set: { using:false,timeout:null,setter:null,setted:null,temp:null,item:null } };
 
@@ -19,6 +19,8 @@ basic.update = function() { var a = false;
 	config.hasOwnProperty("afk") || (config.afk = { time:15,warning:null,warn:true,bop:true }, a = true);
 	a && settings.save();
 	commands = botti._.union(commands, basic.commands);
+  var bcmds = basic.commands.filter(function(e){ return e.bare == true; });
+  if(!bcmds) core.cmds.bare += []; else core.cmds.bare += bcmds.map(function(e){ return e.command; });
 }
 
 basic.registered = function(a) {
@@ -76,7 +78,7 @@ basic.onspeak = function(a) {
 
 basic.onpmmed = function(a) {
 	if (core.setup.on) return install.handlesetup(a.senderid, a.text, true);
-	basic.handlecommand(a.senderid, a.text);
+	basic.handlecommand(a.senderid, a.text, true);
 };
 
 basic.newsong = function(a) {
@@ -92,8 +94,8 @@ basic.newsong = function(a) {
 basic.endsong = function() {
   core.currentdj ? (core.currentdj.ups += core.currentsong.up, core.currentdj.downs += core.currentsong.down, basic.save(core.currentdj), basic.say(config.on.endsong, 
   	core.currentdj.userid)) : basic.say(config.on.endsong);
-  config.on.endsong && (core.lastsong = Parse(config.on.endsong));
-  config.on.endsong || (core.lastsong = Parse("{songtitle}: {up} \u2191, {down} \u2193, {heartcount} <3."))
+  config.on.endsong && (core.lastsong = basic.parse(config.on.endsong));
+  config.on.endsong || (core.lastsong = basic.parse("{songtitle}: {up} \u2191, {down} \u2193, {heartcount} <3."))
 };
 
 basic.snagged = function(b) {
@@ -104,6 +106,7 @@ basic.snagged = function(b) {
 basic.nosong = function(a) { Log("No song. Hrmph."); };
 
 basic.voted = function(a) {
+  if (!config.installdone) return;
   core.currentsong.up = a.room.metadata.upvotes;core.currentsong.down = a.room.metadata.downvotes;a = a.room.metadata.votelog;
   for(var c = 0;c < a.length;c++) { var b = core.user[a[c][0]];b && !basic.isbot(b.userid) && (config.afk.bop && basic.updateidle(b), basic.save(b)) }
 };
@@ -141,7 +144,7 @@ basic.greet = function(g) {
   core.users.togreet = [];
   if(config.greeting.on) { 
     for(var b = [], c = [], d = [], e = [], f = 0;f < g.length;f++) { var a = core.user[g[f]];if(!a || -1 < a.name.indexOf("ttstats")) { return };
-      if (Modules.has("vips")) {
+      if (Module.has("vips")) {
       	a.rgreets[config.room] ? basic.say(a.rgreets[config.room], a.userid) : (a.greeting && config.netgreets ? basic.say(a.greeting, a.userid) : vips.check(a.userid) ? c.push(a.name) : basic.ismod(a.userid) ? e.push(a.name) : a.su ? d.push(a.name) : b.push(a.name), basic.enter(a.userid))
       } else {
       	a.rgreets[config.room] ? basic.say(a.rgreets[config.room], a.userid) : (a.greeting && config.netgreets ? basic.say(a.greeting, a.userid) : basic.ismod(a.userid) ? e.push(a.name) : a.su ? d.push(a.name) : b.push(a.name), basic.enter(a.userid))
@@ -154,7 +157,7 @@ basic.greet = function(g) {
   }
 };
 
-basic.enter = function(a) { if (!config.pm || !config.greeting.pm) return;var msg = Parse(config.greeting.pm, a);bot.pm(msg, a) };
+basic.enter = function(a) { if (!config.pm || !config.greeting.pm) return;var msg = basic.parse(config.greeting.pm, a);bot.pm(msg, a) };
 
 basic.loop = function() {
   basic.checkafks();core.users.togreet.length && basic.greet(core.users.togreet);core.users.tosave.length && basic.saveusers(core.users.tosave);
@@ -193,7 +196,7 @@ basic.handlecommand = function(b, c, e, g, h) {
   c = d.join(" ");
   d = commands.filter(function(a) { return a.command && a.command == f || "object" == typeof a.command && a.command.length && -1 != a.command.indexOf(f) });
   if(1 > d.length && Module.has("alias")) return alias.check(b, f, e);
-  if(!config.installed && f != 'install') return basic.say("Something hasn't been installed! Type /install to get started!", b, e);
+  if(!config.installdone && f != 'install') return basic.say("Something hasn't been installed! Type /install to get started!", b, e);
   d.forEach(function(a) {
     if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) {
       return Log("Not high enough level to use")
@@ -259,7 +262,7 @@ basic.level = function(b) {
 }
 
 basic.parse = function(a, b) {
-  if(a && isNaN(a) && config.installed) {
+  if(a && isNaN(a) && config.installdone) {
     core.user[b] && (a = a.replace("{username}", core.user[b].name));
     core.user[b] && (a = a.replace("{userid}", core.user[b].userid));
     a = a.replace("{room}", core.roomname)
@@ -274,6 +277,7 @@ basic.parse = function(a, b) {
     .replace("{heartcount}", core.currentsong.heart);
     Module.has("limit") && (a = limit.parse(a));
     Module.has("queue") && (a = queue.parse(a));
+    Module.has("dynamic") && (a = dynamic.parse(a));
     Module.has("lonely") && (a = lonely.parse(a));
     var d = a.match(/\{user\.[^}]*\}/gi);
     if(d) { for(var e = 0;e < d.length;++e) {
@@ -284,15 +288,13 @@ basic.parse = function(a, b) {
   return a;
 };
 
-basic.canpm = function(a) { return!a || !core.user[a] || "android" == core.user[a].laptop || !bot.pm ? false : true };
-
 basic.say = function(a, b, c, d) {
   if(a && (d || !core.mute)) {
     !config.chat && (!config.pm && b) && bot.pm("Please notify a mod I can't talk right now. They can fix this with /turn [chat/pm] on.", b);
     a = basic.parse(a, b);
     if(!config.chat && !b) return bot.speak(a);
-    if(c && basic.canpm(b) || !config.chat) return bot.pm(a, b);
-    bot.speak(a)
+    if(c || !config.chat) return bot.pm(a, b);
+    bot.speak(a);
   }
 };
 
@@ -343,7 +345,7 @@ bot.on("update_votes", basic.voted);
 basic.commands = [,{
   command: 'install',
   callback:function(a) {
-    config.installed || (core.setup.on = true, core.setup.user = a, basic.say("Looks like you have some installing to do! You ready?", a, true))
+    config.installdone || (core.setup.on = true, core.setup.user = a, basic.say("Looks like you have some installing to do! You ready?", a, true))
   },
   mode: 2,level: 5,hidden: true,hint: 'config for the bot'
 }, {
@@ -465,7 +467,7 @@ basic.commands = [,{
 }, {
   command: 'status',
   callback: function(b, c, d) { var a = "";
-	  Module.has("limit") && (a += "Limit: {limits}/{maxsongs}/{waitsongs}; ");Module.has("queue") && (a += "Queue: {queueon}; ");
+	  Module.has("limit") && (a += "Limit: {limits}/{maxsongs}/{waitsongs}; ");Module.has("queue") && (a += "Queue: {queueon}; ");Module.has("dynamic") && (a += "Dynamic: {dynamic}; ");
 	  a += "AFK: {afk}; Warn: {warn}; ";Module.has("lonely") && (a += "Lonely: {lonely}; ");"full" == c && (a += "Greeting:{greeting}; Help:{help}; Theme: {theme};");
 	  basic.say(a, b, d);
 	},
@@ -522,6 +524,9 @@ basic.commands = [,{
     else if (Module.has('queue')) {
     	if (s1 == 'queue') { s4 = 'config.queue.on'; } 
 	    else if (s1 == 'enforce') { s4 = 'config.queue.enforce'; }
+    }
+    else if (Module.has('dynamic')) {
+      if (s1 == 'dynamic') { s4 = 'config.dynamic'; }
     }
     else if (Module.has('retire')) {
     	 if (s1 == 'retire') {
@@ -647,7 +652,7 @@ basic.commands = [,{
     if (s1 == 'afkwarn') s3 = 'config.on.afkwarn';
     if (s1 == 'afkboot') s3 = 'config.on.afkboot';
     if (!s3 || !s2) return basic.say(this.hint, a, c);
-    Log("Setting " + s3 + " to have the value of " + s2);basic.say("Setting " + s1 + " to " + s2, a, b);if("off" == s2 || "none" == s2 || "null" == s2) { s2 = null };
+    Log("Setting " + s3 + " to have the value of " + s2);basic.say("Setting " + s1 + " to " + s2, a, c);if("off" == s2 || "none" == s2 || "null" == s2) { s2 = null };
     isNaN(s2) ? eval(s3 + ' = "' + s2 + '"') : eval(s3 + " = " + s2);settings.save();
   },
   level: 3,mode: 2,hint: "Useage: /set [item] [value]. ex: /set afk 10, /set theme dubstep"
