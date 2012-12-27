@@ -32,7 +32,7 @@ global.config = {
 
 	name: "name",
 	laptop: "chrome",
-	theme: "EDM",
+	theme: "None",
 
 	owners: ['4e0ff328a3f751670a084ba6'],
 

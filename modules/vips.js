@@ -60,9 +60,9 @@ vips.commands = [{
   callback: function(e, d, f) {
 	  if(1 > config.vips.length) return basic.say("There aren't any VIPs in here.", e, f);
 	  d = [];for(var a = config.vips.length - 1;0 <= a;a--) { d.push('(SELECT name FROM users WHERE id = "' + config.vips[a] + '") as ab' + a) }
-	  client.query("SELECT " + d.join(", "), function(b) { if(b) { return console.log(b) }var c = [];b = 0;
-	    for(var a = config.vips.length - 1;0 <= a;a--) { eval("b[0].ab" + a) ? c.push(botti.db.strip(eval("b[0].ab" + a))) : b++ }
-	    c = "VIPs: " + c.join(", ");0 < b && (c = c + ", and " + b + " more.");basic.say(c, e, f)
+	  client.query("SELECT " + d.join(", "), function(a, b, c) { if (a) return console.log(a);var t = [];var s = 0;
+	    for (var i = config.vips.length - 1; i >= 0; i--) {if (eval('b[0].ab'+i)) { t.push(botti.db.strip(eval('b[0].ab'+i))); }
+	    else { s++ }; };var phrase = "Mods: " + t.join(", ");if (s > 0) phrase = phrase + ", and "+s+" more.";basic.say(phrase, e, f);
 	  })
 	},
   mode: 2,level: 0,hint: 'lists vips'
