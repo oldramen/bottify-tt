@@ -632,6 +632,9 @@ basic.commands = [,{
 	    if (s1 == 'unban') s3 = 'config.on.unban';
 	    if (s1 == 'banned') s3 = 'config.on.banned';
     }
+    if (Module.has('lonely')) {
+      if (s1 == 'lonelydj') s3 = 'config.lonely';
+    }
     if (s1 == 'greeting' || s1 == 'greeting.user') s3 = 'config.greeting.user';
     if (s1 == 'greeting.mod') s3 = 'config.greeting.mod';
     if (s1 == 'greeting.vip') s3 = 'config.greeting.vip';
