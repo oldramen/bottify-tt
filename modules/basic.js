@@ -573,6 +573,7 @@ basic.commands = [,{
     else if (s1 == 'greeting') { s4 = 'config.greeting.on'; }
     else if (s1 == 'netgreet') { s4 = 'config.netgreets'; }
     else { return basic.say(this.hint, a, c); };
+    if (!s4) return basic.say(this.hint,a,c);
     if (s1 == 'dj' && s2 == 'on' && Module.has('lonely')) {
     	config.dj = true; config.lonely = false; settings.save(); 
       return basic.say("Turned lonely off and DJ on.",a,c);
