@@ -166,8 +166,8 @@ basic.loop = function() {
 
 basic.checkafks = function() {
   for(var b = 0;b < core.djs.length;b++) { var a = core.user[core.djs[b]];if(!a || !config.afk.time) { break }
-    var c = (Date.now() - a.afk) / 6E4;c >= config.afk.time && basic.afkboot(a);(sWarn = config.afk.warning) || (sWarn = 0.693148 * config.afk.time);
-    !a.warned && (c >= sWarn && config.afk.warn) && (basic.say(config.on.afkwarn, a.userid), a.warned = true)
+    var c = (Date.now() - a.afk) / 6E4;c >= config.afk.time && !basic.isbot(core.djs[b]) && basic.afkboot(a);(sWarn = config.afk.warning) || (sWarn = 0.693148 * config.afk.time);
+    !a.warned && !basic.isbot(core.djs[b]) && (c >= sWarn && config.afk.warn) && (basic.say(config.on.afkwarn, a.userid), a.warned = true)
   }
 };
 
@@ -183,9 +183,14 @@ basic.remove = function(a) {
   core.users.left[a] = setTimeout(function() { core.users.left[a] && (delete core.user[a], delete core.users.left[a], bot.emit("removed")) }, 15E3) 
 };
 
-basic.updateidle = function(a) { a.afk = Date.now();a.warned = false; 
+basic.updateidle = function(a) { a.afk = Date.now();a.warned = false; };
 
-basic.refreshdjs = function() { bot.roomInfo(function (a) { core.djs = a.room.metadata.djs;	}); };};
+basic.refreshdjs = function() { 
+  bot.roomInfo(function (a) { 
+    core.djs = a.room.metadata.djs;	
+    if (Module.has('lonely')) lonely.check();
+  }); 
+};
 
 basic.handlecommand = function(b, c, e, g, h) {
   if(!core.booted) return Log("Not booted, can't do commands");
@@ -504,7 +509,7 @@ basic.commands = [,{
   mode: 2,level: 0,bare: true,hint: 'says the help message'
 }, {
   command: 'avatars',
-  callback: function (a, b, c) { bot.getAvatarIds(function(a) { basic.say("http://bots.yayramen.com/av?a="+a.ids.join(','), a, c); }); },
+  callback: function (a, b, c) { bot.getAvatarIds(function(x) { basic.say("http://bots.yayramen.com/av?a="+x.ids.join(','), a, c); }); },
   mode: 2,level: 5,hint: 'Bot will remove you after your next song.'
 }, {
   command: 'turn',
@@ -512,52 +517,49 @@ basic.commands = [,{
   callback: function (a, b, c) {
     if (!b) return basic.say(this.hint, a, c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3 = true;var s4;
-    if (s1 =='me') { return basic.say("Oh, stop it you! Be professional!",a,c); }
-    else if (Module.has('limit')) {
-    	if (s1 == 'wait' || s1 == 'waits') { s4 = 'config.songs.waits'; } 
-    	else if (s1 == 'limit') { s4 = 'config.songs.on'; }
-	    else if (s1 == 'modsongs') {
-	      if (!basic.isown(a)) return this.notowner(a,c);
-	      s4 = 'config.modsongs';
-	    }
+    if (s1 == 'me') { return basic.say("Oh, stop it you! Be professional!",a,c); }
+    else if (s1 == 'wait' || s1 == 'waits' || s1 == 'limit' || s1 == 'modsongs') {
+      if (!Module.has('limit')) return;
+      if (s1 == 'wait' || s1 == 'waits') s4 = 'config.songs.wait';
+      if (s1 == 'limit') s4 = 'config.songs.on';
+      if (s1 == 'modsongs') {
+        if (!basic.isown(a)) return this.notowner(a,c);
+        s4 = 'config.modsongs';
+      }
     }
-    else if (Module.has('queue')) {
-    	if (s1 == 'queue') { s4 = 'config.queue.on'; } 
-	    else if (s1 == 'enforce') { s4 = 'config.queue.enforce'; }
+    else if (s1 == 'queue' || s1 == 'enforce') {
+      if (!Module.has('queue')) return;
+      if (s1 == 'queue') s4 = 'config.queue.on';
+      if (s1 == 'enforce') s4 = 'config.queue.enforce';
     }
-    else if (Module.has('dynamic')) {
-      if (s1 == 'dynamic') { s4 = 'config.dynamic'; }
+    else if (s1 == 'dynamic') {
+      if (Module.has('dynamic')) s4 = 'config.dynamic';
     }
-    else if (Module.has('retire')) {
-    	 if (s1 == 'retire') {
-	      if (!basic.isown(a)) return this.notowner(a,c);
-	      s4 = 'config.retire';
-	    }
+    else if (s1 == 'retire' || s1 == 'retireremove') {
+      if (!Module.has('retire')) return;
+      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'retire') s4 = 'config.retired';
+      if (s1 == 'retireremove') s4 = 'config.retiredremove';
     }
-    else if (Module.has('dj')) {
-			if (s1 == 'dj') {
-	      if (!basic.isown(a)) return this.notowner(a,c);
-	      s4 = 'config.dj';
-	    }
+    else if (s1 == 'dj') {
+      if (!Module.has('dj')) return;
+      if (!basic.isown(a)) return this.notowner(a,c);
+      s4 = 'config.dj';
     }
-    else if (Module.has('economy')) {
-    	if (s1 == 'wallet' || s1 == 'economy') {
-	      if (!basic.isown(a)) return this.notowner(a,c);
-	      s4 = 'config.economy';
-	    }
-	    else if (s1 == 'waiter') {
-	      if (!basic.isown(a)) return this.notowner(a,c);
-	      s4 = 'config.waiter';
-	    }
+    else if (s1 == 'wallet' || s1 == 'economy' || s1 == 'waiter' ) {
+      if (!Module.has('economy')) return;
+      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'wallet' || s1 == 'economy') s4 = 'config.economy';
+      if (s1 == 'waiter') s4 == 'config.waiter';
     }
-    else if (Module.has('list')) {
-    	if (s1 == 'whitelist') { s4 = 'config.whitelist'; }
+    else if (s1 == 'whitelist') {
+      if (Module.has('list')) s4 = 'config.whitelist';
     }
-    else if (Module.has('lonely')) {
-    	if (s1 == 'lonely') { s4 = 'config.lonely'; }
+    else if (s1 == 'lonely') {
+      if (Module.has('lonely')) s4 = 'config.lonely';
     }
-    else if (Module.has('notify')) {
-    	if (s1 == 'notify') { s4 = 'config.notify.on'; }
+    else if (s1 == 'notify') {
+      if (Module.has('notify')) s4 = 'config.notify.on';
     }
     else if (s1 == 'warn') { s4 = 'config.afk.warn'; } 
     else if (s1 == 'afkbop') { s4 = 'config.afk.bop'; }
@@ -573,7 +575,6 @@ basic.commands = [,{
     else if (s1 == 'greeting') { s4 = 'config.greeting.on'; }
     else if (s1 == 'netgreet') { s4 = 'config.netgreets'; }
     else { return basic.say(this.hint, a, c); };
-    if (!s4) return basic.say(this.hint,a,c);
     if (s1 == 'dj' && s2 == 'on' && Module.has('lonely')) {
     	config.dj = true; config.lonely = false; settings.save(); 
       return basic.say("Turned lonely off and DJ on.",a,c);
@@ -634,7 +635,7 @@ basic.commands = [,{
 	    if (s1 == 'banned') s3 = 'config.on.banned';
     }
     if (Module.has('lonely')) {
-      if (s1 == 'lonelydj') s3 = 'config.lonely';
+      if (s1 == 'lonelydj') s3 = 'config.lonelydj';
     }
     if (s1 == 'greeting' || s1 == 'greeting.user') s3 = 'config.greeting.user';
     if (s1 == 'greeting.mod') s3 = 'config.greeting.mod';
@@ -693,7 +694,7 @@ basic.commands = [,{
   mode: 2,level: 0,hidden: true,hint: 'deny a greeting'
 }, {
   command: 'reboot',
-  callback: function (a, b, c) { basic.say("/me flickered off.");throw new Error('Rebooting') },
+  callback: function (a, b, c) { basic.say("/me flickered off.");Log('Rebooting');process.send('reboot,'+config.file); },
   mode: 2,level: 5,hint: 'reboots the bot'
 }, {
   command: 'hop',
@@ -710,5 +711,9 @@ basic.commands = [,{
 }, {
   command: 'album',
   callback: function (a, b, c) { var msg2 = config.msg.album.replace('{title}', core.currentsong.name).replace('{album}', core.currentsong.album);basic.say(msg2, a, c) },
+  level: 0,hint: "Get the album",hidden: true,mode: 2
+}, {
+  command: 'numdjs',
+  callback: function(a,b,c){ basic.say("There are "+core.djs.length+" dj's.",a,c)},
   level: 0,hint: "Get the album",hidden: true,mode: 2
 }];

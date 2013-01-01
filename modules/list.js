@@ -18,7 +18,7 @@ list.adddj = function(b) {
   var a = core.user[b.user[0].userid];
   if(a) { 
     if(config.whitelist && -1 === config.list.indexOf(a.userid)) {
-      return bot.remDj(a.userid), Log(a.name + " was escorted: not on whitelist"), basic.say(msg.whitelist.notin, a.userid, true)
+      return bot.remDj(a.userid), Log(a.name + " was escorted: not on whitelist"), basic.say(config.msg.whitelist.notin, a.userid, true)
     }
     a.droppedRoom = config.room;basic.updateidle(a);basic.save(a);Log(a.name + " started DJing");basic.say(config.on.adddj, b.user[0].userid);basic.refreshdjs();
     core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (b = core.djs.indexOf(core.currentdj.userid), b = b == core.djs.length - 1 ? 0 : b + 1, 
@@ -26,7 +26,7 @@ list.adddj = function(b) {
   }
 };
 
-list.add = function(a) { -1 === config.list.indexOf(a.userid) && config.list.push(a.userid);basic.say(msg.whitelist.add, a.userid);settings.save(); };
+list.add = function(a) { -1 === config.list.indexOf(a.userid) && config.list.push(a.userid);basic.say(config.msg.whitelist.add, a.userid);settings.save(); };
 
 //Hook Events
 bot.on('booted', list.update);

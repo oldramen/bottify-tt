@@ -42,4 +42,8 @@ for (var x in Modules) { if (Modules[x] == 1) Module.load(x); };
 
 //Load Files
 botti.install = require("./install.js");botti.db = require("./db.js").db;
-//Compatibility
+
+//Stuff and Stuff
+process.on('uncaughtException', function(err) { console.log(err); });
+process.on('SIGINT', function(err) { process.exit(); });
+process.on('SIGTERM', function(err) { process.exit(); });

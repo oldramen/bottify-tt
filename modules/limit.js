@@ -17,7 +17,7 @@ limit.update = function(){ var a = false;
 
 limit.adddj = function(b) {
   var a = core.user[b.user[0].userid];limit.waited(a) && (a.waiting = a.count = 0);
-  if(config.songs.waits && 0 < a.waiting) return bot.remDj(a.userid), Log(a.name + " was escorted: song wait"), basic.say(msg.waitlimit, a.userid, true);
+  if(config.songs.waits && 0 < a.waiting) return bot.remDj(a.userid), Log(a.name + " was escorted: song wait"), basic.say(config.msg.waitlimit, a.userid, true);
   a && !Module.has("list") && (a.droppedRoom = config.room, basic.updateidle(a), basic.save(a), Log(a.name + " started DJing"), basic.say(config.on.adddj, 
   	b.user[0].userid), basic.refreshdjs(), core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (b = core.djs.indexOf(core.currentdj.userid), 
   	b = b == core.djs.length - 1 ? 0 : b + 1, core.nextdj = core.user[core.djs[b]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true)))

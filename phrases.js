@@ -24,6 +24,8 @@ global.msg = {
 	waitlimit: "I'm sorry but you have to wait {user.waiting} song(s) to get back up.",
 	nowallet: "This room doesn't use the economy, sorry,",
 	retired: "@{username}, this song is on the retired list, please skip!",
+	retiredremove: "@{username}, this song is on the retired list. Please skip, or you will be removed!",
+	retiredremoved: "Sorry, @{username}, but that song is retired in this room.",
 
 	tmp: {
 		ban: "{username} has been temporarily banned.",

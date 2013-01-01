@@ -20,7 +20,8 @@ global.Modules = {
  	last:   0, //paid
  	retire: 0, //paid
  	notify: 0, //paid
- 	dj:     0  //free
+ 	dj:     0, //free
+ 	dynamic:0  //free/paid, idk
  };
 
 global.config = {

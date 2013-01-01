@@ -1,5 +1,6 @@
 install.js
 db.js
+go.js
 modules/alias.js
 modules/notify.js
 modules/retire.js

@@ -15,11 +15,11 @@ lonely.update = function(){ var a = false;
 };
 
 lonely.check = function() {
-  if((!Module.has("queue") || !config.qued.length) && config.lonely) {
-    if(config.lonelydj == core.djs.length && -1 == core.djs.indexOf(config.uid)) { bot.addDj(), core.lonely = true } else {
-      if((config.lonelydj+1 < core.djs.length || 1 == core.djs.length) && -1 != core.djs.indexOf(config.uid)) { bot.remDj(), core.lonely = false }
-    }
-  }
+	var a = config.lonelydj+1;
+	if ((!Module.has('queue') || !config.qued.length) && config.lonely) {
+		if (core.djs.length < a && !core.lonely && core.djs.length > 0) { bot.addDj();core.lonely = true }
+		else if ((core.djs.length > a || core.djs.length == 1) && core.lonely) { bot.remDj();core.lonely=false;}
+	}
 };
 
 lonely.parse = function(a,b) {
@@ -30,5 +30,3 @@ lonely.parse = function(a,b) {
 
 //Hook Events
 bot.on('booted', lonely.update);
-bot.on('add_dj', lonely.check);
-bot.on('rem_dj', lonely.check);

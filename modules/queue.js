@@ -27,8 +27,8 @@ queue.adddj = function(a) {
 
 queue.refine = function() {
   for(var a = 0;a < config.qued.length;a++) { core.user[config.qued[a]] || config.qued.splice(a, 1) };
-  for(a = 0;a < core.djs.length;a++) { 0 < config.qued.indexOf(core.djs[a]) && config.qued.splice(config.qued.indexOf(core.djs[a]), 1) };
-};
+  for(a = core.djs.length - 1;0 <= a;a--) { 0 < config.qued.indexOf(core.djs[a]) && config.qued.splice(config.qued.indexOf(core.djs[a]), 1) };
+}
 
 queue.autos = function() { 
   for(var a = 0;a < core.users.auto.length;a++) { var b = core.user[core.users.auto[a]];if(!b) { return } 0 < b.removed && (b.removed = 0) };core.users.auto = [];
