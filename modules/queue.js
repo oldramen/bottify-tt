@@ -43,7 +43,7 @@ queue.guarantee = function(a) {
     return false
   }
   if(config.qued[0] == a.userid) {
-    return clearTimeout(core.qtimeout), core.qtimeout = null, config.qued.shift(), true
+    return clearTimeout(core.qtimeout), core.qtimeout = null, config.qued.shift(), bot.emit('unqueued'), true
   }
 };
 
@@ -51,7 +51,7 @@ queue.advance = function() {
   if(config.queue.on && 0 < config.qued.length && !core.qtimeout) {
     var a = config.on.queue.next.replace("{queuetimeout}", config.queue.timeout);basic.say(a, config.qued[0]);
     1 < config.qued.length && config.on.firstinqueue && basic.say(config.on.firstinqueue, config.qued[1], true);
-    core.qtimeout = setTimeout(function() { config.qued.shift();core.qtimeout = null;queue.advance() }, 1E3 * config.queue.timeout)
+    core.qtimeout = setTimeout(function() { config.qued.shift();bot.emit('unqueued');core.qtimeout = null;queue.advance() }, 1E3 * config.queue.timeout)
   }
 };
 
@@ -61,6 +61,10 @@ queue.parse = function(a,b) {
 	.replace('{queueon}', basic.lightswitch(config.queue.on));
 	return a;
 };
+
+queue.more = function(a,b) { config.qued.push(a);settings.save();basic.say(config.msg.queue.add,a,b);bot.emit('queued'); };
+
+queue.less = function(a,b) { config.qued.splice(config.qued.indexOf(a), 1);settings.save();basic.say(config.msg.queue.remove,a,b);bot.emit('unqueued'); };
 
 //Hook Events
 bot.on('booted', queue.update);
@@ -77,7 +81,7 @@ queue.commands = [{
 	  if(-1 !== config.qued.indexOf(a)) return basic.say(config.msg.queue.alreadyin, a, b);
 	  if(-1 !== core.djs.indexOf(a)) return basic.say(config.msg.queue.dj, a, b);
 	  if(core.djs.length < core.maxdjs && !config.qued.length) return basic.say(config.queue.open, a, b);
-	  config.qued.push(a);settings.save();basic.say(config.msg.queue.add, a, b)
+	  queue.more(a,b);
 	},
   mode: 2,level: 0,bare: true,hint: 'Adds user to the queue'
 }, {
@@ -85,7 +89,7 @@ queue.commands = [{
   callback: function(a, c, b) {
 	  if(!config.queue.on) return basic.say(config.msg.queue.off, a, b);
 	  if(-1 == config.qued.indexOf(a)) return basic.say(config.msg.queue.notin, a, b);
-	  config.qued.splice(config.qued.indexOf(a), 1);settings.save();basic.say(config.msg.queue.remove, a, b)
+	  queue.less(a,b)
 	},
   mode: 2,level: 0,bare: true,hint: 'Removes user from the queue'
 }, {

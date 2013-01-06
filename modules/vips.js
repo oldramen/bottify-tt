@@ -62,7 +62,7 @@ vips.commands = [{
 	  d = [];for(var a = config.vips.length - 1;0 <= a;a--) { d.push('(SELECT name FROM users WHERE id = "' + config.vips[a] + '") as ab' + a) }
 	  client.query("SELECT " + d.join(", "), function(a, b, c) { if (a) return console.log(a);var t = [];var s = 0;
 	    for (var i = config.vips.length - 1; i >= 0; i--) {if (eval('b[0].ab'+i)) { t.push(botti.db.strip(eval('b[0].ab'+i))); }
-	    else { s++ }; };var phrase = "Mods: " + t.join(", ");if (s > 0) phrase = phrase + ", and "+s+" more.";basic.say(phrase, e, f);
+	    else { s++ }; };var phrase = "VIPs: " + t.join(", ");if (s > 0) phrase = phrase + ", and "+s+" more.";basic.say(phrase, e, f);
 	  })
 	},
   mode: 2,level: 0,hint: 'lists vips'

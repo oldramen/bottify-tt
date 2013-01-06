@@ -490,6 +490,10 @@ basic.commands = [,{
   callback: function (a, b, c) { basic.say("Hey, what's up?", a, true); },
   mode: 2,level: 0,hint: 'Bot says sup'
 }, {
+  command: 'modules',
+  callback: function (a, b, c) { basic.say("Modules: " + Module.loaded.join(", "), a, true); },
+  mode: 2,level: 0,hint: 'Lists installed modules'
+}, {
   command: 'theme',
   callback: function(b, c, d) {
 	  if(!c) return basic.say(config.msg.theme, b, d);
