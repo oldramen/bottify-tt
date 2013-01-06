@@ -18,6 +18,7 @@ basic.update = function() { var a = false;
 	config.hasOwnProperty("pm") || (config.pm = true, a = true);config.hasOwnProperty("chat") || (config.chat = true, a = true);
 	config.hasOwnProperty("afk") || (config.afk = { time:15,warning:null,warn:true,bop:true }, a = true);
 	a && settings.save();
+  bot.roomInfo(function(a){ core.maxdjs = a.room.metadata.max_djs; });
 	commands = botti._.union(commands, basic.commands);
   var bcmds = basic.commands.filter(function(e){ return e.bare == true; });
   if(!bcmds) core.cmds.bare += []; else core.cmds.bare += bcmds.map(function(e){ return e.command; });

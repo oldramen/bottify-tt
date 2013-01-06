@@ -45,5 +45,5 @@ botti.install = require("./install.js");botti.db = require("./db.js").db;
 
 //Stuff and Stuff
 process.on('uncaughtException', function(err) { console.log(err); });
-process.on('SIGINT', function(err) { process.exit(); });
-process.on('SIGTERM', function(err) { process.exit(); });
+process.on('SIGINT', function() { process.exit(); });
+process.on('SIGTERM', function() { process.exit(); });

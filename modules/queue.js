@@ -9,7 +9,8 @@ global.queue = function(){};
 
 queue.update = function(){ var a = false;
 	config.hasOwnProperty("queue") || (config.queue = { on:false,enforce:true,timeout:15 }, a = true);
-	config.hasOwnProperty("qued") || (config.qued = [], a = true);
+  config.hasOwnProperty("qued") || (config.qued = [], a = true);
+	config.hasOwnProperty("away") || (config.away = { user:[],out:null }, a = true);
 	a && settings.save();queue.refine();
 	commands = botti._.union(commands, queue.commands);
   var bcmds = queue.commands.filter(function(e){ return e.bare == true; });
@@ -18,7 +19,7 @@ queue.update = function(){ var a = false;
 
 queue.adddj = function(a) {
   var b = core.user[a.user[0].userid];
-  if((!config.queue.on || queue.guarantee(b)) && b && !Module.has("limit,list")) {
+  if(((!config.queue.on && !config.away.length) || queue.guarantee(b)) && b && !Module.has("limit,list")) {
     b.droppedRoom = config.room, basic.updateidle(b), basic.save(b), Log(b.name + " started DJing"), basic.say(config.on.adddj, a.user[0].userid), basic.refreshdjs(), 
     core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (a = core.djs.indexOf(core.currentdj.userid), a = a == core.djs.length - 1 ? 0 : a + 1, 
     	core.nextdj = core.user[core.djs[a]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true))
@@ -35,7 +36,12 @@ queue.autos = function() {
 };
 
 queue.guarantee = function(a) {
+  var djsleft = core.maxdjs - core.djs.length;
   if(1 > config.qued.length) { return true };
+  if(config.away.user.length) {
+    if(2 > djsleft && -1 === config.away.user.indexOf(a.userid)) return false;
+    if(-1 !== config.away.user.indexOf(a.userid)) return config.away.user = [], clearTimeout(config.away.out), config.away.out = null, true;
+  }
   if(-1 === config.qued.indexOf(a.userid) || config.qued[0] != a.userid) {
     var b = config.on.queue.notnext.replace("{nextinqueue}", core.user[config.qued[0]].name);
     -1 == core.users.auto.indexOf(a.userid) && basic.say(b, a.userid);
@@ -121,4 +127,12 @@ queue.commands = [{
 	  };config.qued.unshift();
 	},
   mode: 2,level: 3,hint: 'pushes user to the front of the queue'
+}, {
+  command: 'away',
+  callback: function(a,b,c) {
+    if (config.away.user.length) return basic.say("Someone is already refreshing, hold on.",a,c);
+    config.away.user.push();config.away.out = setTimeout(function(){ config.away.user = [];config.away.out = null; }, 30000);
+    basic.say("All right, holding your spot. You have 30 seconds to refresh. Hurry up!",a,c);
+  },
+  mode:2,level:0,hint:'saves spot for user to refresh'
 }];
