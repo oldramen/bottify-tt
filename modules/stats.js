@@ -100,7 +100,7 @@ stats.commands = [{
     };
     if (s1 == "stats") {
       var d = core.user[a];
-      var phrase = config.msg.userinfo.replace('{heart_count}', d.hearts).replace('{given_count}', d.given).replace('{total_songs}', d.songs).replace('{heart_percentage}', Round(d.hearts / d.songs * 100, 2))
+      var phrase = config.msg.userinfo.replace('{heart_count}', d.hearts).replace('{given_count}', d.given).replace('{total_songs}', d.songs).replace('{heart_percentage}', basic.round(d.hearts / d.songs * 100, 2))
       basic.say(phrase, a, c)
     }
     if (s1 == "localgreet") {

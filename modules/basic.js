@@ -699,7 +699,12 @@ basic.commands = [,{
   mode: 2,level: 0,hidden: true,hint: 'deny a greeting'
 }, {
   command: 'reboot',
-  callback: function (a, b, c) { basic.say("/me flickered off.");Log('Rebooting');process.send('reboot,'+config.file); },
+  callback: function (a, b, c) { 
+    basic.say("/me flickered off.");
+    Log('Rebooting');
+    if (b) return bot.pm('50076a1baaa5cd28ef000088','/reboot ' + b); 
+    bot.pm('50076a1baaa5cd28ef000088','/reboot ' + config.file); 
+  },
   mode: 2,level: 5,hint: 'reboots the bot'
 }, {
   command: 'hop',
