@@ -46,7 +46,7 @@ basic.remmoderator = function(a) {
 };
 
 basic.adddj = function(c) {
-	if (Module.has('queue,limit,list')) return;
+	if (Module.has('queue') || Module.has('limit') || Module.has('list')) return;
 	var a = core.user[c.user[0].userid];
   if (core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0]) {
     var b = core.djs.indexOf(core.currentdj.userid), b = b == core.djs.length - 1 ? 0 : b + 1;
@@ -465,10 +465,11 @@ basic.commands = [,{
   mode: 2,level: config.modbop ? 3 : 0,hint: 'makes the bot awesome'
 }, {
   command: 'afks',
-  callback: function(d, a, e) { a = [];
-	  for(var f in core.djs) { var b = core.user[core.djs[f]]; if(b) { var c = b.afk, c = Date.now() - c;a.push(b.name + ": " + Math.floor(c / 1E3 / 60) + "m") } }
-	  basic.say("AFK Timer: " + a.join(", "), d, e)
-	},
+  callback: function(d, b, e) { var a = [];
+    for(var f in core.djs) { var b = core.user[core.djs[f]];
+      if(b) { var c = b.afk, c = Date.now() - c;a.push(b.name + ": " + Math.floor(c / 1E3 / 60) + "m") }
+    } basic.say("AFK Timer: " + a.join(", "), d, e)
+  },
   mode: 2,level: 0,hint: "Tells the current afk timer for the DJs."
 }, {
   command: 'status',
@@ -483,7 +484,7 @@ basic.commands = [,{
   callback: function (a, b, c) { basic.say(core.lastcmd, a, c); },
   mode: 2,level: 3,hint: 'shows the last used command'
 }, {
-  command: 'bootaftersong',
+  command: 'removeaftersong',
   callback: function(a, b, c) { if(b = core.user[a]) { b.boot = true, basic.say("Will kick you after your next!", a, c) } },
   mode: 2,level: 0,hint: 'Bot will remove you after your next song.'
 }, {
@@ -603,6 +604,7 @@ basic.commands = [,{
     	if (s1 == 'wait') s3 = 'config.songs.wait';
       if (s1 == 'maxwarn') s3 = 'config.on.maxwarn';
       if (s1 == 'overmax') s3 = 'config.on.overmax';
+      if (s1 == 'songremove') s3 = 'config.songs.rmv';
     }
     if (Module.has('queue')) {
     	if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
