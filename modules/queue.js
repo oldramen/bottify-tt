@@ -19,7 +19,7 @@ queue.update = function(){ var a = false;
 
 queue.adddj = function(a) {
   var b = core.user[a.user[0].userid];
-  if(b && queue.guarantee(b) && !Module.has("limit") && !Module.has("list")) {
+  if(b && queue.guarantee(b) && !Module.has("limit|list")) {
     b.droppedRoom = config.room, basic.updateidle(b), basic.save(b), Log(b.name + " started DJing"), basic.say(config.on.adddj, a.user[0].userid), basic.refreshdjs(), 
     core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0] && (a = core.djs.indexOf(core.currentdj.userid), a = a == core.djs.length - 1 ? 0 : a + 1, 
     	core.nextdj = core.user[core.djs[a]], core.nextdj.userid && basic.say(config.on.nextdj, core.nextdj.userid, true))

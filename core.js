@@ -7,8 +7,13 @@
 global.Log = function(a) { console.log(config.name, ">>>", a + "."); };function puts(error, stdout, stderr) { sys.puts(stdout) };global.Module = {};Module.loaded = [];
 Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a);Log("Loaded Module: "+a); }; 
 global.settings = function(){}; settings.save = function(){  return core.saving = true; };
-Module.has = function(a) { var b = a.split(",");for (var i = b.length - 1; i >= 0; i--) { return-1 < Module.loaded.indexOf(b[i]) ? true : false }; };
-
+Module.has = function(d) { 
+  if (d.indexOf("&") > 0) {
+    for (var c=d.split("&"),b=c.length-1;0<=b;b--) { if (1>Module.loaded.indexOf(c[b])) { return false; } if (0==b) { return true; } }
+  } else if (d.indexOf("|") > 0) {
+    for (var c=d.split("|"),b=c.length-1;0<=b;b--) { if (1<Module.loaded.indexOf(c[b])) { return true; } if (0==b) { return false; } }
+  } else { return 0 < Module.loaded.indexOf(c) ? true : false }
+};
 
 //Load Plugins
 global.botti = {

@@ -46,7 +46,7 @@ basic.remmoderator = function(a) {
 };
 
 basic.adddj = function(c) {
-	if (Module.has('queue') || Module.has('limit') || Module.has('list')) return;
+	if (Module.has('queue|limit|list')) return;
 	var a = core.user[c.user[0].userid];
   if (core.nextdj && core.currentdj && core.nextdj.userid == core.djs[0]) {
     var b = core.djs.indexOf(core.currentdj.userid), b = b == core.djs.length - 1 ? 0 : b + 1;
@@ -725,7 +725,7 @@ basic.commands = [,{
   callback: function (a, b, c) { var msg2 = config.msg.album.replace('{title}', core.currentsong.name).replace('{album}', core.currentsong.album);basic.say(msg2, a, c) },
   level: 0,hint: "Get the album",hidden: true,mode: 2
 }, {
-  command: 'numdjs',
-  callback: function(a,b,c){ basic.say("There are "+core.djs.length+" dj's.",a,c)},
-  level: 0,hint: "Get the album",hidden: true,mode: 2
+  command: 'test',
+  callback: function(a,b,c){ console.log(Module.has('limit&list&queue'))},
+  level: 0,hint: "Testing",hidden: true,mode: 2
 }];
