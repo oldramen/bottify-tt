@@ -8,7 +8,8 @@
 global.limit = function(){};
 
 limit.update = function(){ var a = false;
-	config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false }, a = true);
+  config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false }, a = true);
+	config.songs.hasOwnProperty("rmv") || (config.songs.rmv = 60, a = true);
 	a && settings.save();
 	commands = botti._.union(commands, limit.commands);
   var bcmds = limit.commands.filter(function(e){ return e.bare == true; });
@@ -29,7 +30,7 @@ limit.endsong = function() {
   Module.has("vips") || core.currentdj && core.djs.length >= config.songs.mindj && config.songs.on && core.currentdj.count >= config.songs.max && limit.over(core.currentdj)
 };
 
-limit.waited = function(a) { if(a) { return!a.droppedRoom || a.droppedRoom != config.room || (Date.now() - a.dropped) / 6E4 >= 3 * config.songs.wait ? true : false } };
+limit.waited = function(a) { if (Module.has('queue') && -1 !== config.away.user.indexOf(a.userid)) { return false; }; if(a) { return!a.droppedRoom || a.droppedRoom != config.room || (Date.now() - a.dropped) / 6E4 >= 3 * config.songs.wait ? true : false } };
 
 limit.addsong = function() { ++core.currentdj.count;basic.save(core.currentdj); };
 
@@ -39,7 +40,7 @@ limit.over = function(a) {
   setTimeout(function() {
     a.dropped = Date.now();a.droppedRoom = config.room;config.songs.waits && (a.waiting = config.songs.wait);
     basic.isdj(a.userid) && (bot.remDj(a.userid), basic.say(config.on.overmax, a.userid), Log(core.user[a.userid].name + " was escorted: over song limit"))
-  }, 6E4)
+  }, config.songs.rmv * 1000)
 };
 
 limit.parse = function(a,b) {
