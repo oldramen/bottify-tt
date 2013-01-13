@@ -12,7 +12,7 @@ Module.has = function(d) {
     for (var c=d.split("&"),b=c.length-1;0<=b;b--) { if (1>Module.loaded.indexOf(c[b])) { return false; } if (0==b) { return true; } }
   } else if (d.indexOf("|") > 0) {
     for (var c=d.split("|"),b=c.length-1;0<=b;b--) { if (1<Module.loaded.indexOf(c[b])) { return true; } if (0==b) { return false; } }
-  } else { return 0 < Module.loaded.indexOf(c) ? true : false }
+  } else { return 0 < Module.loaded.indexOf(d) ? true : false }
 };
 
 //Load Plugins

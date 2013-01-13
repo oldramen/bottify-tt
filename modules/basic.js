@@ -134,7 +134,7 @@ basic.refreshmeta = function(a) {
 
 basic.refreshuser = function(a, b) {
   a.name = b.name.replace(/'/g, "").replace(/"/g, "");a.laptop = b.laptop;a.hasOwnProperty("rgreets") || (a.rgreets = {});a.hasOwnProperty("fans") || (a.fans = b.fans);
-  a.hasOwnProperty("points") || (a.points = b.points);a.fans = b.fans;a.points = b.points;return a;
+  a.hasOwnProperty("points") || (a.points = b.points);a.hasOwnProperty("passwords") || (a.passwords = []);a.fans = b.fans;a.points = b.points;return a;
 };
 
 basic.refreshafks = function() { for(var a in core.user) { core.user[a].afk = Date.now() }; };
@@ -533,10 +533,12 @@ basic.commands = [,{
         s4 = 'config.modsongs';
       }
     }
-    else if (s1 == 'queue' || s1 == 'enforce') {
+    else if (s1 == 'queue' || s1 == 'enforce' || s1 == 'password') {
       if (!Module.has('queue')) return;
       if (s1 == 'queue') s4 = 'config.queue.on';
       if (s1 == 'enforce') s4 = 'config.queue.enforce';
+      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'password') s4 = 'config.pass.on';
     }
     else if (s1 == 'dynamic') {
       if (Module.has('dynamic')) s4 = 'config.dynamic';
@@ -612,6 +614,9 @@ basic.commands = [,{
     	if (s1 == 'nextup') s3 = 'config.on.queue.next';
       if (s1 == 'notnext') s3 = 'config.on.queue.notnext';
       if (s1 == 'open') s3 = 'config.on.queue.open';
+      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'password') s3 = 'config.pass.word';
+      if (s1 == 'passwordmsg') s3 = 'config.pass.msg';
     }
     if (Module.has('vips')) {
       if (s1 == 'addvip') s3 = 'config.on.addvip';
@@ -686,7 +691,7 @@ basic.commands = [,{
 	    clearTimeout(core.set.timeout), "greet" == core.set.item && (core.set.setted.greeting = core.set.temp,
     	basic.say(core.set.setted.name + "'s greeting is now: " + core.set.setted.greeting, core.set.setted.userid, a),
     	basic.save(core.set.setted)), "local" == core.set.item && (core.set.setted.rgreets[config.room] = core.set.temp,
-    	basic.say(core.set.setted.name + "'s local greeting is now: " + core.set.setted.greeting, core.set.setted.userid, a), basic.save(core.set.setted)),
+    	basic.say(core.set.setted.name + "'s local greeting is now: " + core.set.temp, core.set.setted.userid, a), basic.save(core.set.setted)),
     	core.set.using = false,core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null
 	  }
 	},

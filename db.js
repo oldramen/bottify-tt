@@ -66,6 +66,7 @@ db.create = function(a, b) {
 		c.hearts = 0;
 		c.given = 0;
 		c.greeting = null;
+		c.passwords = [];
 		c.boot = false;
 		c.su = 0 < b.acl ? true : false;
 		c.joined = Date.now();
