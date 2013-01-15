@@ -15,6 +15,11 @@ Module.has = function(d) {
   } else { return 0 < Module.loaded.indexOf(d) ? true : false }
 };
 
+//Prototyping? WHY NOT. 
+String.prototype.isAny = function(a) {
+	if (a.indexOf("|") > 0) { for (var c=a.split("|"),b=c.length-1;0<=b;b--) { if (this == c[b]) { return true; } if (0==b) { return false; }  }  }
+}
+
 //Load Plugins
 global.botti = {
 	ttapi: require("ttapi"), util: require("util"), _: require("underscore"), mysql: require("mysql"), twit: require("twit"), 
