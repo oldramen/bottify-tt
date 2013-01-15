@@ -524,26 +524,26 @@ basic.commands = [,{
     if (!b) return basic.say(this.hint, a, c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3 = true;var s4;
     if (s1 == 'me') { return basic.say("Oh, stop it you! Be professional!",a,c); }
-    else if (s1 == 'wait' || s1 == 'waits' || s1 == 'limit' || s1 == 'modsongs') {
+    else if (s1.isAny('wait|waits|limit|modsongs')) {
       if (!Module.has('limit')) return;
-      if (s1 == 'wait' || s1 == 'waits') s4 = 'config.songs.wait';
+      if (s1.isAny('wait|waits')) s4 = 'config.songs.wait';
       if (s1 == 'limit') s4 = 'config.songs.on';
       if (s1 == 'modsongs') {
         if (!basic.isown(a)) return this.notowner(a,c);
         s4 = 'config.modsongs';
       }
     }
-    else if (s1 == 'queue' || s1 == 'enforce' || s1 == 'password') {
+    else if (s1.isAny('queue|enforce|password')) {
       if (!Module.has('queue')) return;
       if (s1 == 'queue') s4 = 'config.queue.on';
       if (s1 == 'enforce') s4 = 'config.queue.enforce';
-      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'password' && !basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'password') s4 = 'config.pass.on';
     }
     else if (s1 == 'dynamic') {
       if (Module.has('dynamic')) s4 = 'config.dynamic';
     }
-    else if (s1 == 'retire' || s1 == 'retireremove') {
+    else if (s1.isAny('retire|retireremove') {
       if (!Module.has('retire')) return;
       if (!basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'retire') s4 = 'config.retired';
@@ -554,7 +554,7 @@ basic.commands = [,{
       if (!basic.isown(a)) return this.notowner(a,c);
       s4 = 'config.dj';
     }
-    else if (s1 == 'wallet' || s1 == 'economy' || s1 == 'waiter' ) {
+    else if (s1.isAny('wallet|economy|waiter') {
       if (!Module.has('economy')) return;
       if (!basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'wallet' || s1 == 'economy') s4 = 'config.economy';
@@ -597,77 +597,69 @@ basic.commands = [,{
   mode: 2,level: 3,hint: "Useage: /turn *item* [on/off]. ex: /turn warn off"
 }, {
   command: 'set',
+  notowner: function(a,b) {basic.say("Owner only option, sorry.", a, b);},
   callback: function (a, b, c) {
     if (!b) return basic.say(this.hint, a, c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3;
-    if (Module.has('limit')) {
-    	if (s1 == 'limit') s3 = 'config.songs.max';
-    	if (s1 == 'mindj') s3 = 'config.songs.mindj';
-    	if (s1 == 'wait') s3 = 'config.songs.wait';
+    if (s1.isAny('limit|mindj|wait|maxwarn|overmax|songremove')) {
+      if (!Module.has('limit')) return;
+      if (s1 == 'limit') s3 = 'config.songs.max';
+      if (s1 == 'mindj') s3 = 'config.songs.mindj';
+      if (s1 == 'wait') s3 = 'config.songs.wait';
       if (s1 == 'maxwarn') s3 = 'config.on.maxwarn';
       if (s1 == 'overmax') s3 = 'config.on.overmax';
       if (s1 == 'songremove') s3 = 'config.songs.rmv';
-    }
-    if (Module.has('queue')) {
-    	if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
-    	if (s1 == 'headsup') s3 = 'config.on.firstinqueue';
-    	if (s1 == 'nextup') s3 = 'config.on.queue.next';
+    } else if (s1.isAny('queue.timeout|headsup|nextup|notnext|open|password|passwordmsg')) {
+      if (!Module.has('queue')) return;
+      if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
+      if (s1 == 'headsup') s3 = 'config.on.firstinqueue';
+      if (s1 == 'nextup') s3 = 'config.on.queue.next';
       if (s1 == 'notnext') s3 = 'config.on.queue.notnext';
       if (s1 == 'open') s3 = 'config.on.queue.open';
-      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1.isAny('passwordmsg|password') && !basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'password') s3 = 'config.pass.word';
       if (s1 == 'passwordmsg') s3 = 'config.pass.msg';
-    }
-    if (Module.has('vips')) {
+    } else if (s1.isAny('addvip|remvip')) {
+      if (!Module.has('vips')) return;
       if (s1 == 'addvip') s3 = 'config.on.addvip';
       if (s1 == 'remvip') s3 = 'config.on.remvip';
-    }
-    if (Module.has('admin')) {
-    	if ((s1 == 'greeting' || s1 == 'greeting.user') && config.greeting.locked) {
-	      return basic.say("Changing the room greet is locked.",a,c);
-	    }
-	    if (s1 == 'name') {
-	    	if (!basic.isown(a)) return basic.say("Owner only option, sorry.", a, c);
-	      config.name = s2;basic.say("Attempting to change name to: "+s2, a, c);return basic.update();
-	    }
-	    if (s1 == 'laptop') {
-	      if (!basic.isown(a)) return basic.say("Owner only option, sorry.", a, c);
-	      if (s2 != 'pc' && s2 != 'mac' && s2 != 'chrome' && s2 != 'android' && s2 != 'linux') return basic.say("Invalid laptop. (pc/mac/chrome/linux/android/iphone}", a, c);
-	      config.laptop = s2;settings.save();return basic.update();
-	    }
-	    if (s1 == 'avatar') {
-	      if (!basic.isown(a)) return basic.say("Owner only option, sorry.", a, c);
-	      basic.say("Attempting to change avatar...",a,c);
-	      return bot.setAvatar(s2);
-	    }
-    }
-    if (Module.has('bans')) {
-	    if (s1 == 'ban') s3 = 'config.on.ban';
-	    if (s1 == 'unban') s3 = 'config.on.unban';
-	    if (s1 == 'banned') s3 = 'config.on.banned';
-    }
-    if (Module.has('lonely')) {
+    } else if (s1.isAny('name|laptop|avatar')) {
+      if (!Module.has('admin')) return;
+      if (!basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'name') { config.name = s2;basic.say("Attempting to change name to: "+s2, a, c);return basic.update(); }
+      if (s1 == 'laptop') { if (s2 != 'pc' && s2 != 'mac' && s2 != 'chrome' && s2 != 'android' && s2 != 'linux') return basic.say("Invalid laptop. (pc/mac/chrome/linux/android/iphone}", a, c);config.laptop = s2;settings.save();return basic.update(); }
+      if (s1 == 'avatar') { basic.say("Attempting to change avatar...",a,c);return bot.setAvatar(s2); }
+    } else if (s1.isAny('ban|unban|banned')) {
+      if (!Module.has('bans')) return;
+      if (s1 == 'ban') s3 = 'config.on.ban';
+      if (s1 == 'unban') s3 = 'config.on.unban';
+      if (s1 == 'banned') s3 = 'config.on.banned';
+    } else if (s1 == 'lonely') {
+      if (!Module.has('lonely')) return;
       if (s1 == 'lonelydj') s3 = 'config.lonelydj';
-    }
-    if (s1 == 'greeting' || s1 == 'greeting.user') s3 = 'config.greeting.user';
-    if (s1 == 'greeting.mod') s3 = 'config.greeting.mod';
-    if (s1 == 'greeting.vip') s3 = 'config.greeting.vip';
-    if (s1 == 'greeting.su') s3 = 'config.greeting.su';
-    if (s1 == 'greeting.pm') s3 = 'config.greeting.pm';
-    if (s1 == 'theme') s3 = 'config.theme';
-    if (s1 == 'dance') s3 = 'config.dance';
-    if (s1 == 'nextdj') s3 = 'config.on.nextdj';
-    if (s1 == 'afk') s3 = 'config.afk.time';
-    if (s1 == 'warn') s3 = 'config.afk.warning';
-    if (s1 == 'adddj') s3 = 'config.on.adddj';
-    if (s1 == 'remdj') s3 = 'config.on.remdj';
-    if (s1 == 'addmod') s3 = 'config.on.addmod';
-    if (s1 == 'remmod') s3 = 'config.on.remmod';
-    if (s1 == 'snag') s3 = 'config.on.snag';
-    if (s1 == 'endsong') s3 = 'config.on.endsong';
-    if (s1 == 'help') s3 = 'config.on.help';
-    if (s1 == 'afkwarn') s3 = 'config.on.afkwarn';
-    if (s1 == 'afkboot') s3 = 'config.on.afkboot';
+    } else if (s1.isAny('greeting|greeting.user|greeting.mod|greeting.vip|greeting.su|greeting.pm')) {
+      if (Module.has('admin') && config.greeting.locked) return basic.say("Changing the room greet is locked.",a,c);
+      if (s1 == 'greeting' || s1 == 'greeting.user') s3 = 'config.greeting.user';
+      if (s1 == 'greeting.mod') s3 = 'config.greeting.mod';
+      if (s1 == 'greeting.vip') s3 = 'config.greeting.vip';
+      if (s1 == 'greeting.su') s3 = 'config.greeting.su';
+      if (s1 == 'greeting.pm') s3 = 'config.greeting.pm';
+    } else {
+      if (s1 == 'theme') s3 = 'config.theme';
+      if (s1 == 'dance') s3 = 'config.dance';
+      if (s1 == 'nextdj') s3 = 'config.on.nextdj';
+      if (s1 == 'afk') s3 = 'config.afk.time';
+      if (s1 == 'warn') s3 = 'config.afk.warning';
+      if (s1 == 'adddj') s3 = 'config.on.adddj';
+      if (s1 == 'remdj') s3 = 'config.on.remdj';
+      if (s1 == 'addmod') s3 = 'config.on.addmod';
+      if (s1 == 'remmod') s3 = 'config.on.remmod';
+      if (s1 == 'snag') s3 = 'config.on.snag';
+      if (s1 == 'endsong') s3 = 'config.on.endsong';
+      if (s1 == 'help') s3 = 'config.on.help';
+      if (s1 == 'afkwarn') s3 = 'config.on.afkwarn';
+      if (s1 == 'afkboot') s3 = 'config.on.afkboot';  
+    }    
     if (!s3 || !s2) return basic.say(this.hint, a, c);
     Log("Setting " + s3 + " to have the value of " + s2);basic.say("Setting " + s1 + " to " + s2, a, c);if("off" == s2 || "none" == s2 || "null" == s2) { s2 = null };
     isNaN(s2) ? eval(s3 + ' = "' + s2 + '"') : eval(s3 + " = " + s2);settings.save();
@@ -731,6 +723,6 @@ basic.commands = [,{
   level: 0,hint: "Get the album",hidden: true,mode: 2
 }, {
   command: 'test',
-  callback: function(a,b,c){ console.log(Module.has('limit&list&queue'))},
+  callback: function(a,b,c){ var d="hello";console.log(d.isAny("hellos|goodbye|things"))},
   level: 0,hint: "Testing",hidden: true,mode: 2
 }];
