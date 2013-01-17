@@ -120,7 +120,7 @@ basic.boot = function() {
   core.looping = setInterval(function() { basic.loop() }, 1E4)
 };
 
-basic.set = function() { bot.modifyProfile({name: config.name});bot.modifyName(config.name);bot.modifyLaptop(config.laptop); };
+basic.set = function() { bot.modifyLaptop(config.laptop); };
 
 basic.refreshmeta = function(a) {
   core.djs = [];core.currentsong = {name:"", up:-1, down:-1, heart:-1};
@@ -533,17 +533,15 @@ basic.commands = [,{
         s4 = 'config.modsongs';
       }
     }
-    else if (s1.isAny('queue|enforce|password')) {
+    else if (s1.isAny('queue|enforce')) {
       if (!Module.has('queue')) return;
       if (s1 == 'queue') s4 = 'config.queue.on';
       if (s1 == 'enforce') s4 = 'config.queue.enforce';
-      if (s1 == 'password' && !basic.isown(a)) return this.notowner(a,c);
-      if (s1 == 'password') s4 = 'config.pass.on';
     }
     else if (s1 == 'dynamic') {
       if (Module.has('dynamic')) s4 = 'config.dynamic';
     }
-    else if (s1.isAny('retire|retireremove') {
+    else if (s1.isAny('retire|retireremove')) {
       if (!Module.has('retire')) return;
       if (!basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'retire') s4 = 'config.retired';
@@ -554,14 +552,16 @@ basic.commands = [,{
       if (!basic.isown(a)) return this.notowner(a,c);
       s4 = 'config.dj';
     }
-    else if (s1.isAny('wallet|economy|waiter') {
+    else if (s1.isAny('wallet|economy|waiter')) {
       if (!Module.has('economy')) return;
       if (!basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'wallet' || s1 == 'economy') s4 = 'config.economy';
       if (s1 == 'waiter') s4 == 'config.waiter';
     }
-    else if (s1 == 'whitelist') {
+    else if (s1.isAny('whitelist|password')) {
       if (Module.has('list')) s4 = 'config.whitelist';
+      if (s1 == 'password' && !basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'password') s4 = 'config.pass.on';
     }
     else if (s1 == 'lonely') {
       if (Module.has('lonely')) s4 = 'config.lonely';
@@ -609,16 +609,13 @@ basic.commands = [,{
       if (s1 == 'maxwarn') s3 = 'config.on.maxwarn';
       if (s1 == 'overmax') s3 = 'config.on.overmax';
       if (s1 == 'songremove') s3 = 'config.songs.rmv';
-    } else if (s1.isAny('queue.timeout|headsup|nextup|notnext|open|password|passwordmsg')) {
+    } else if (s1.isAny('queue.timeout|headsup|nextup|notnext|open')) {
       if (!Module.has('queue')) return;
       if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
       if (s1 == 'headsup') s3 = 'config.on.firstinqueue';
       if (s1 == 'nextup') s3 = 'config.on.queue.next';
       if (s1 == 'notnext') s3 = 'config.on.queue.notnext';
       if (s1 == 'open') s3 = 'config.on.queue.open';
-      if (s1.isAny('passwordmsg|password') && !basic.isown(a)) return this.notowner(a,c);
-      if (s1 == 'password') s3 = 'config.pass.word';
-      if (s1 == 'passwordmsg') s3 = 'config.pass.msg';
     } else if (s1.isAny('addvip|remvip')) {
       if (!Module.has('vips')) return;
       if (s1 == 'addvip') s3 = 'config.on.addvip';
@@ -644,6 +641,11 @@ basic.commands = [,{
       if (s1 == 'greeting.vip') s3 = 'config.greeting.vip';
       if (s1 == 'greeting.su') s3 = 'config.greeting.su';
       if (s1 == 'greeting.pm') s3 = 'config.greeting.pm';
+    } else if (s1.isAny('password|passwordmsg')) {
+      if (!Module.has('list')) return;
+      if (s1.isAny('passwordmsg|password') && !basic.isown(a)) return this.notowner(a,c);
+      if (s1 == 'password') s3 = 'config.pass.word';
+      if (s1 == 'passwordmsg') s3 = 'config.pass.msg';      
     } else {
       if (s1 == 'theme') s3 = 'config.theme';
       if (s1 == 'dance') s3 = 'config.dance';
