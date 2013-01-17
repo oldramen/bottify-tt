@@ -20,10 +20,10 @@ String.prototype.isAny = function(a) {
 	if (a.indexOf("|") > 0) { for (var c=a.split("|"),b=c.length-1;0<=b;b--) { if (this == c[b]) { return true; } if (0==b) { return false; }  }  }
 }
 
-//Load Plugins
+//Load Plugins/vars
 global.botti = {
 	ttapi: require("ttapi"), util: require("util"), _: require("underscore"), mysql: require("mysql"), twit: require("twit"), 
-	lastfm: require("lastfm").LastFmNode, sys: require('sys'), exec: require('child_process').exec
+	lastfm: require("lastfm").LastFmNode, sys: require('sys'), exec: require('child_process').exec, usedb: true
 };
 
 //Define Tiers

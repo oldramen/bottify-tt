@@ -19,7 +19,7 @@ db.parse = function(a) {
 };
 
 db.create = function(a, b) {
-	if (a == "settings") {
+	if (a == "settings" && botti.usedb) {
 		client.query('CREATE TABLE settings'
 			+ '(id VARCHAR(255),'
 	    + ' data TEXT)',
@@ -27,7 +27,7 @@ db.create = function(a, b) {
 		);
 		Log("Created settings table");
 	};
-	if (a == "users") {
+	if (a == "users" && botti.usedb) {
 		client.query('CREATE TABLE users'
 			+ '(id VARCHAR(255),'
 	    + ' name VARCHAR(255),'
@@ -72,7 +72,7 @@ db.create = function(a, b) {
 		c.joined = Date.now();
 		return c;
 	};
-	if (a == "songs") {
+	if (a == "songs" && botti.usedb) {
 		client.query('CREATE TABLE song'
 			+ '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
 			+ ' songid VARCHAR(255),'
@@ -100,7 +100,7 @@ db.create = function(a, b) {
 		);
 		Log("Created songs table");
 	};
-	if (a == "retired") {
+	if (a == "retired" && botti.usedb) {
 		var table = config.file+'_retired';
 		var tablename = table.replace('.','');
 		client.query('CREATE TABLE '+tablename
@@ -113,7 +113,7 @@ db.create = function(a, b) {
 };
 
 db.load = function(a, z) {
-	if (a == "settings") {
+	if (a == "settings" && botti.usedb) {
 		client.query('SELECT data FROM settings WHERE (id = \''+ config.room +'\')',
 			function(a, b, c) {
 				if (a) return console.log(a);
@@ -124,20 +124,24 @@ db.load = function(a, z) {
 		);
 	};
 	if (a == "user") {
-  	client.query('SELECT data FROM users WHERE (id = \''+ z.userid +'\')',
-  		function(a, b, c) {
-				if (!b[0]) { core.user[z.userid] = db.create("user", z)}
-				else {
-					core.user[z.userid] = basic.refreshuser(db.parse(b[0].data), z);
-				};
-				Log("Loaded "+z.name);
-			}
-		);
+		if (botti.usedb) {
+	  	client.query('SELECT data FROM users WHERE (id = \''+ z.userid +'\')',
+	  		function(a, b, c) {
+					if (!b[0]) { core.user[z.userid] = db.create("user", z)}
+					else {
+						core.user[z.userid] = basic.refreshuser(db.parse(b[0].data), z);
+					};
+					Log("Loaded "+z.name);
+				}
+			);
+	  } else {
+	  	core.user[z.userid] = db.create("user", z)
+	  }
 	};
 };
 
 db.save = function(a, y, z) {
-	if (a == "settings") {
+	if (a == "settings" && botti.usedb) {
 		client.query('SELECT data FROM settings WHERE (id = \''+ config.room +'\')',
 			function(a, b, c) {
 				if (!b[0]) {
@@ -152,7 +156,7 @@ db.save = function(a, y, z) {
 			}
 		);
 	};
-	if (a == "user") {
+	if (a == "user" && botti.usedb) {
 		client.query('SELECT data FROM users WHERE (id = \''+ y.userid +'\')',
 			function(a, b, c) {
 				if (!b[0]) {
@@ -169,7 +173,7 @@ db.save = function(a, y, z) {
 			}
 		);
 	};
-	if (a == "song") {
+	if (a == "song" && botti.usedb) {
 		if (!y.current_song || config.nostats) return;
 		client.query('INSERT INTO song (songid, djid, djname, hearts, up, down, name, artist, room, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', 
 			[y.current_song._id, y.current_song.djid, y.current_song.djname, z, 
@@ -206,6 +210,8 @@ exports.db = db;
 
 //Connect
 Log("Connecting to DB");
-global.client = botti.mysql.createConnection({user: "root", password: "", database: "bots", host: "localhost", insecureAuth: true});
-db.create("settings");db.create("users");db.create("songs");db.create("retired");
+if (botti.usedb) {
+	global.client = botti.mysql.createConnection({user: "root", password: "", database: "bots", host: "localhost", insecureAuth: true});
+	db.create("settings");db.create("users");db.create("songs");db.create("retired");
+};
 Log("Connected");
