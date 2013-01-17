@@ -16,7 +16,10 @@ lonely.update = function(){ var a = false;
 
 lonely.check = function() {
 	var a = config.lonelydj+1;
-	if ((!Module.has('queue') || !config.qued.length) && config.lonely) {
+	if (Module.has('queue')) {
+		if (config.qued.length) return;
+	}
+	if (config.lonely) {
 		if (core.djs.length < a && !core.lonely && core.djs.length > 0) { bot.addDj();core.lonely = true }
 		else if ((core.djs.length > a || core.djs.length == 1) && core.lonely) { bot.remDj();core.lonely=false;}
 	}
