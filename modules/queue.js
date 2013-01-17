@@ -11,7 +11,6 @@ queue.update = function(){ var a = false;
 	config.hasOwnProperty("queue") || (config.queue = { on:false,enforce:true,timeout:15 }, a = true);
   config.hasOwnProperty("qued") || (config.qued = [], a = true);
   config.hasOwnProperty("away") || (config.away = { user:[],out:null }, a = true);
-	config.hasOwnProperty("pass") || (config.pass = { word:"yummyramen",on:false,msg:"You need a password to DJ! Type /p [password] when you know it!" }, a = true);
 	a && settings.save();queue.refine();
 	commands = botti._.union(commands, queue.commands);
   var bcmds = queue.commands.filter(function(e){ return e.bare == true; });
@@ -38,10 +37,7 @@ queue.autos = function() {
 };
 
 queue.guarantee = function(a) {
-  if (!config.queue.on && !config.away.user.length && !config.pass.on) return true;
-  if(config.pass.on && 0 > a.passwords.indexOf(config.room)) {
-    return basic.say(config.pass.msg, a.userid), bot.remDj(a.userid), false
-  }
+  if (!config.queue.on && !config.away.user.length) return true;
   if(config.away.user.length) {
     if(-1 === config.away.user.indexOf(a.userid)) {
       return basic.say("Someone is waiting for that spot. Give them a second.", a.userid), bot.remDj(a.userid), false
@@ -145,13 +141,4 @@ queue.commands = [{
     basic.say("All right, holding your spot. You have 30 seconds to refresh. Hurry up!",a,c);
   },
   mode:2,level:0,hint:'saves spot for user to refresh'
-}, {
-  command: 'p',
-  callback: function(b, d, c) {
-    var a = core.user[b];
-    if(!core.user[b]) return;
-    if(-1 !== a.passwords.indexOf(config.room)) return basic.say("You've already entered the password!", b, c);
-    d == config.pass.word && (basic.say("Password entered successfully!", b, c), a.passwords.push(config.room), basic.save(a))
-  },
-  mode:1,level:0,hint:'Enter the password to enable DJing with password protection'
 }];

@@ -10,12 +10,16 @@ global.list = function(){};
 list.update = function(){ var a = false;
 	config.hasOwnProperty("whitelist") || (config.whitelist = false, a = true);
 	config.hasOwnProperty("list") || (config.list = [], a = true);
+	config.hasOwnProperty("pass") || (config.pass = { word:"yummyramen",on:false,msg:"You need a password to DJ! Type /p [password] when you know it!" }, a = true);
 	a && settings.save();
 	commands = botti._.union(commands, list.commands);
 };
 
 list.adddj = function(b) {
   var a = core.user[b.user[0].userid];
+  if(config.pass.on && 0 > a.passwords.indexOf(config.room)) {
+    return basic.say(config.pass.msg, a.userid), bot.remDj(a.userid)
+  }
   if(a) { 
     if(config.whitelist && -1 === config.list.indexOf(a.userid)) {
       return bot.remDj(a.userid), Log(a.name + " was escorted: not on whitelist"), basic.say(config.msg.whitelist.notin, a.userid, true)
@@ -66,4 +70,13 @@ list.commands = [{
 	  })
 	},
   mode: 2,level: 0,hint: 'lists whitelisted users'
+}, {
+  command: 'p',
+  callback: function(b, d, c) {
+    var a = core.user[b];
+    if(!core.user[b]) return;
+    if(-1 !== a.passwords.indexOf(config.room)) return basic.say("You've already entered the password!", b, c);
+    d == config.pass.word && (basic.say("Password entered successfully!", b, c), a.passwords.push(config.room), basic.save(a))
+  },
+  mode:1,level:0,hint:'Enter the password to enable DJing with password protection'
 }]
