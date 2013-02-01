@@ -7,21 +7,21 @@
 global.Tier = 0;
 
 global.Modules = {
- 	bans:   0, //paid
- 	econ:   0, //paid
- 	queue:  0, //paid
- 	limit:  0, //paid
  	admin:  0, //paid
- 	lonely: 0, //free
  	alias:  0, //paid
+ 	dj:     0, //free
+ 	bans:   0, //paid
+ 	dynamic:0,  //free
+ 	econ:   0, //paid
+ 	lonely: 0, //free
+ 	notify: 0, //paid
+ 	queue:  0, //paid
+ 	retire: 0, //paid
+ 	limit:  0, //paid
  	vips:   0, //paid
  	list:   0, //paid
  	twit:   0, //paid
- 	last:   0, //paid
- 	retire: 0, //paid
- 	notify: 0, //paid
- 	dj:     0, //free
- 	dynamic:0  //free/paid, idk
+ 	last:   0 //paid
  };
 
 global.config = {
