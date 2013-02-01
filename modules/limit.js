@@ -8,8 +8,11 @@
 global.limit = function(){};
 
 limit.update = function(){ var a = false;
-  config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false }, a = true);
-	config.songs.hasOwnProperty("rmv") || (config.songs.rmv = 60, a = true);
+  config.hasOwnProperty("songs") || (config.songs = { max:3,wait:1,waits:true,on:false,mindj:3,dynamic:false,rmv:60,small:false,reup:false }, a = true);
+  config.songs.hasOwnProperty("rmv") || (config.songs.rmv = 60, a = true);
+  config.songs.hasOwnProperty("small") || (config.songs.small = false, a = true);
+  config.hasOwnProperty("reup") || (config.reup = false, a = true);
+	config.msg.hasOwnProperty("reup") || (config.msg.reup = "Hey, {username}, you've been added to the queue! Type q- to leave!", a = true);
 	a && settings.save();
 	commands = botti._.union(commands, limit.commands);
   var bcmds = limit.commands.filter(function(e){ return e.bare == true; });
@@ -38,16 +41,23 @@ limit.over = function(a) {
   basic.say(config.on.maxwarn, a.userid);
   Log(core.user[a.userid].name + " hit song limit");
   setTimeout(function() {
-    a.dropped = Date.now();a.droppedRoom = config.room;config.songs.waits && (a.waiting = config.songs.wait);
+    a.dropped = Date.now();a.droppedRoom = config.room;config.songs.waits && (a.waiting = config.songs.wait);limit.reup(a);
     basic.isdj(a.userid) && (bot.remDj(a.userid), basic.say(config.on.overmax, a.userid), Log(core.user[a.userid].name + " was escorted: over song limit"))
   }, config.songs.rmv * 1000)
+};
+
+limit.reup = function(a) {
+  if (!config.reup || !Module.has('queue')) return;
+  if (!config.queue.on || config.qued.indexOf(a.userid) !== -1) return;
+  config.qued.push(a.userid);settings.save();basic.say(config.msg.reup, a.userid, true);
 };
 
 limit.parse = function(a,b) {
 	if (!a || !isNaN(a) || config.installedmods.indexOf('limit') < 0) return a;
 	a = a.replace('{limits}', basic.lightswitch(config.songs.on))
 	.replace('{limit}', basic.lightswitch(config.songs.on))
-	.replace('{songlimit}', basic.lightswitch(config.songs.on))
+  .replace('{songlimit}', basic.lightswitch(config.songs.on))
+	.replace('{reup}', basic.lightswitch(config.reup))
 	.replace('{maxsongs}', config.songs.max)
 	.replace('{waitsongs}', config.songs.wait)
 	.replace('{songwait}', config.songs.wait);
@@ -79,8 +89,13 @@ limit.commands = [{
   command: 'djs',
   callback: function(d, b, e) {
 	  if(!b) { b = [];
-	    for(var a = 0;a < core.djs.length;a++) { if(core.djs[a] != config.uid) { var c = core.user[core.djs[a]];c && b.push(c.name + ": " + c.count) } }
-	    a = config.msg.djs.replace("{djsandsongcount}", b.join(", "));1 > b.length && (a = "Sorry, I don't see any DJs");return basic.say(a, d, e)
+      if (config.songs.small) {
+        for(var a=0;a<core.djs.length;a++){ if(core.djs[a]!=config.uid){var c=core.user[core.djs[a]];c&&b.push(c.count)}}
+        a = "Count: "+b.join("");1 > b.length && (a = "Sorry, I don't see any DJs");return basic.say(a, d, e)
+      } else {
+	      for(var a = 0;a < core.djs.length;a++) { if(core.djs[a] != config.uid) { var c = core.user[core.djs[a]];c && b.push(c.name + ": " + c.count) } }
+        a = config.msg.djs.replace("{djsandsongcount}", b.join(", "));1 > b.length && (a = "Sorry, I don't see any DJs");return basic.say(a, d, e)
+      } 
 	  }
 	},
   mode: 2,level: 0,hint: "Song count for the DJs."
