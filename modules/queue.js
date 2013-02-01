@@ -63,7 +63,7 @@ queue.advance = function() {
     var a = config.on.queue.next.replace("{queuetimeout}", config.queue.timeout);basic.say(a, config.qued[0]);
     1 < config.qued.length && config.on.firstinqueue && basic.say(config.on.firstinqueue, config.qued[1], true);
     core.qtimeout = setTimeout(function() { config.qued.shift();bot.emit('unqueued');core.qtimeout = null;queue.advance() }, 1E3 * config.queue.timeout)
-  }
+  } settings.save();
 };
 
 queue.parse = function(a,b) {
@@ -92,7 +92,7 @@ queue.commands = [{
 	  if(-1 !== config.qued.indexOf(a)) return basic.say(config.msg.queue.alreadyin, a, b);
 	  if(-1 !== core.djs.indexOf(a)) return basic.say(config.msg.queue.dj, a, b);
 	  if(core.djs.length < core.maxdjs && !config.qued.length) return basic.say(config.on.queue.open, a, b);
-	  queue.more(a,b);
+	  queue.more(a,b);settings.save();
 	},
   mode: 2,level: 0,bare: true,hint: 'Adds user to the queue'
 }, {
@@ -100,7 +100,7 @@ queue.commands = [{
   callback: function(a, c, b) {
 	  if(!config.queue.on) return basic.say(config.msg.queue.off, a, b);
 	  if(-1 == config.qued.indexOf(a)) return basic.say(config.msg.queue.notin, a, b);
-	  queue.less(a,b)
+	  queue.less(a,b);settings.save();
 	},
   mode: 2,level: 0,bare: true,hint: 'Removes user from the queue'
 }, {
@@ -119,7 +119,7 @@ queue.commands = [{
   callback: function(c, b) {
 	  var a = basic.find(b);
 	  a && (-1 !== config.qued.indexOf(a.userid) && config.qued.splice(config.qued.indexOf(a.userid), 1), config.qued.unshift(a.userid), settings.save(),
-	  basic.say(config.msg.queue.modadd, a.userid, false));config.qued.unshift()
+	  basic.say(config.msg.queue.modadd, a.userid, false));config.qued.unshift();settings.save();
 	},
   mode: 2,level: 3,hint: 'pushes user to the front of the queue'
 }, {
@@ -129,7 +129,7 @@ queue.commands = [{
 	  var a = basic.find(b);
 	  if(a) { if(-1 == config.qued.indexOf(a.userid)) { return } config.qued.splice(config.qued.indexOf(a.userid), 1);settings.save();
 	  	basic.say(config.msg.queue.modremove, a.userid, false)
-	  };config.qued.unshift();
+	  };config.qued.unshift();settings.save();
 	},
   mode: 2,level: 3,hint: 'pushes user to the front of the queue'
 }, {
@@ -137,8 +137,8 @@ queue.commands = [{
   callback: function(a,b,c) {
     if (!basic.isdj(a)) return basic.say("You have to be a DJ for me to hold your spot.",a,c);
     if (config.away.user.length) return basic.say("Someone is already refreshing, hold on.",a,c);
-    config.away.user.push(a);config.away.out = setTimeout(function(){ config.away.user = [];config.away.out = null; }, 30000);
-    basic.say("All right, holding your spot. You have 30 seconds to refresh. Hurry up!",a,c);
+    config.away.user.push(a);config.away.out = setTimeout(function(){ config.away.user = [];config.away.out = null; }, 60000);
+    basic.say("All right, holding your spot. You have 60 seconds to refresh. Hurry up!",a,c);
   },
   mode:2,level:0,hint:'saves spot for user to refresh'
 }];
