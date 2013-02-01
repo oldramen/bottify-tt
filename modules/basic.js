@@ -6,8 +6,15 @@
 
 //Define the core object
 global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],left:[],leaving:{},auto:[] },djs:[],nextdj:null,currentdj:null,cmds:{ bare:[],pm:[] },
-								setup:{ on:false,user:null },currentsong:{ name: "",up:-1,down:-1,heart:-1 },
-								set: { using:false,timeout:null,setter:null,setted:null,temp:null,item:null } };
+	setup:{ on:false,user:null },currentsong:{ name: "",up:-1,down:-1,heart:-1 },set:{ using:false,timeout:null,setter:null,setted:null,temp:null,item:null },
+  dives:["{username} is surfing the crowd!","Oops! {username} lost a shoe sufing the crowd.",
+    "Wooo! {username}'s surfin' the crowd! Now to figure out where the wheelchair came from...",
+    "Well, {username} is surfing the crowd, but where did they get a raft...",
+    "{username} dived off the stage...too bad no one in the audience caught them.",
+    "{username} tried to jump off the stage, but kicked their laptop. Ouch.",
+    "{username} said they were going to do a stagedive, but they just walked off.",
+    "And {username} is surfing the crowd! But why are they shirtless?",
+    "{username} just traumatized us all by squashing that poor kid up front."] };
 
 //Define Events
 global.basic = function(){};
@@ -17,6 +24,7 @@ basic.update = function() { var a = false;
   config.hasOwnProperty("msg") || (config.msg = msg, a = true);config.hasOwnProperty("on") || (config.on = msg.on, a = true);
 	config.hasOwnProperty("pm") || (config.pm = true, a = true);config.hasOwnProperty("chat") || (config.chat = true, a = true);
 	config.hasOwnProperty("afk") || (config.afk = { time:15,warning:null,warn:true,bop:true }, a = true);
+  config.hasOwnProperty("dives") || (config.dives = core.dives, a = true);
 	a && settings.save();
   bot.roomInfo(function(a){ core.maxdjs = a.room.metadata.max_djs; });
 	commands = botti._.union(commands, basic.commands);
@@ -280,6 +288,7 @@ basic.parse = function(a, b) {
     .replace("{songtitle}", core.currentsong.name)
     .replace("{up}", core.currentsong.up)
     .replace("{down}", core.currentsong.down)
+    .replace("{thedj}", core.currentdj.name)
     .replace("{heartcount}", core.currentsong.heart);
     Module.has("limit") && (a = limit.parse(a));
     Module.has("queue") && (a = queue.parse(a));
@@ -429,23 +438,26 @@ basic.commands = [,{
   mode: 2,level: 3,hint: 'removes a dj'
 }, {
   command: 'gtfo',
-  callback: function (a, b, c) { var d = basic.find(b);d && basic.kick(d); },
+  callback: function (a, b, c) { if (!b) { return; } var d = basic.find(b);d && basic.kick(d); },
   mode: 2,level: 3,	hint: 'boots a user'
 }, {
   command: 'stagedive',
-  message: [
-  	"{username} is surfing the crowd!",
-  	"Oops! {username} lost a shoe sufing the crowd.",
-  	"Wooo! {username}'s surfin' the crowd! Now to figure out where the wheelchair came from...",
-  	"Well, {username} is surfing the crowd, but where did they get a raft...",
-  	"{username} dived off the stage...too bad no one in the audience caught them.",
-  	"{username} tried to jump off the stage, but kicked their laptop. Ouch.",
-  	"{username} said they were going to do a stagedive, but they just walked off.",
-  	"And {username} is surfing the crowd! But why are they shirtless?",
-  	"{username} just traumatized us all by squashing that poor kid up front."
-  ],
-  callback: function(a) { if(-1 !== core.djs.indexOf(a)) { var b = basic.rand(this.message);basic.say(b, a);bot.remDj(a) } },
+  callback: function(a) { 
+    if(-1 !== core.djs.indexOf(a)) { var b = basic.rand(config.dives);basic.say(b, a);bot.remDj(a) }
+  },
   level: 0,mode: 2,hint: "Removes if DJ"
+}, {
+  command: 'dive',
+  callback: function (a, f, c) { 
+    var b = f.split(" "), g = b.shift(), b = b.join(" ");
+    if (g == 'add') {
+      console.log(b);
+      if (b.indexOf('{username}') < 0) return basic.say("Dive must contain { username }!",a,c);
+      config.dives.push(b);settings.save();return basic.say("Added "+b+" to the dives!",a,c);
+    };
+    if (g == 'clear') { config.dives = core.dives;settings.save();return basic.say("Custom Dives Cleared!",a,c); }
+  },
+  mode: 2,level: 5,hidden: true,hint: 'moderates the dive list'
 }, {
   command: 'bop',
   callback: function (a, b, c) { bot.vote('up');if (config.dance) basic.say(config.dance); },
@@ -474,7 +486,7 @@ basic.commands = [,{
 }, {
   command: 'status',
   callback: function(b, c, d) { var a = "";
-	  Module.has("limit") && (a += "Limit: {limits}/{maxsongs}/{waitsongs}; ");Module.has("queue") && (a += "Queue: {queueon}; ");Module.has("dynamic") && (a += "Dynamic: {dynamic}; ");
+	  Module.has("limit") && (a += "Limit: {limits}/{maxsongs}/{waitsongs}; Reup:{reup}; ");Module.has("queue") && (a += "Queue: {queueon}; ");Module.has("dynamic") && (a += "Dynamic: {dynamic}; ");
 	  a += "AFK: {afk}; Warn: {warn}; ";Module.has("lonely") && (a += "Lonely: {lonely}; ");"full" == c && (a += "Greeting:{greeting}; Help:{help}; Theme: {theme};");
 	  basic.say(a, b, d);
 	},
@@ -524,10 +536,12 @@ basic.commands = [,{
     if (!b) return basic.say(this.hint, a, c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3 = true;var s4;
     if (s1 == 'me') { return basic.say("Oh, stop it you! Be professional!",a,c); }
-    else if (s1.isAny('wait|waits|limit|modsongs')) {
+    else if (s1.isAny('wait|waits|limit|modsongs|smallcount|reup')) {
       if (!Module.has('limit')) return;
       if (s1.isAny('wait|waits')) s4 = 'config.songs.wait';
       if (s1 == 'limit') s4 = 'config.songs.on';
+      if (s1 == 'smallcount') s4 = 'config.songs.small';
+      if (s1 == 'reup') s4 = 'config.reup';
       if (s1 == 'modsongs') {
         if (!basic.isown(a)) return this.notowner(a,c);
         s4 = 'config.modsongs';
@@ -601,7 +615,7 @@ basic.commands = [,{
   callback: function (a, b, c) {
     if (!b) return basic.say(this.hint, a, c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3;
-    if (s1.isAny('limit|mindj|wait|maxwarn|overmax|songremove')) {
+    if (s1.isAny('limit|mindj|wait|maxwarn|overmax|songremove|reup')) {
       if (!Module.has('limit')) return;
       if (s1 == 'limit') s3 = 'config.songs.max';
       if (s1 == 'mindj') s3 = 'config.songs.mindj';
@@ -609,6 +623,7 @@ basic.commands = [,{
       if (s1 == 'maxwarn') s3 = 'config.on.maxwarn';
       if (s1 == 'overmax') s3 = 'config.on.overmax';
       if (s1 == 'songremove') s3 = 'config.songs.rmv';
+      if (s1 == 'reup') s3 = 'config.msg.reup';
     } else if (s1.isAny('queue.timeout|headsup|nextup|notnext|open')) {
       if (!Module.has('queue')) return;
       if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
@@ -631,7 +646,7 @@ basic.commands = [,{
       if (s1 == 'ban') s3 = 'config.on.ban';
       if (s1 == 'unban') s3 = 'config.on.unban';
       if (s1 == 'banned') s3 = 'config.on.banned';
-    } else if (s1 == 'lonely') {
+    } else if (s1 == 'lonelydj') {
       if (!Module.has('lonely')) return;
       if (s1 == 'lonelydj') s3 = 'config.lonelydj';
     } else if (s1.isAny('greeting|greeting.user|greeting.mod|greeting.vip|greeting.su|greeting.pm')) {
@@ -675,7 +690,11 @@ basic.commands = [,{
 	    core.set.timeout = setTimeout(function() {
 	      core.set.using = false;core.set.setted = null;core.set.setter = null;core.set.temp = null;core.set.item = null;basic.say("User has been deselected.", b, c);
 	    }, 6E4)
-	  }
+	  } else if (core.set.setted && core.set.using) {
+      if (a == 'greeting') {
+        basic.say(core.set.setted.name+"'s greeting is: "+core.set.setted.greeting,core.set.setted.userid,c);
+      }
+    }
 	},
   mode: 2,level: 3,hint: "Select a user for various things"
 }, {
