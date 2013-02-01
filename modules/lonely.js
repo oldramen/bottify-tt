@@ -8,10 +8,10 @@
 global.lonely = function(){};
 
 lonely.update = function(){ var a = false;
-	config.hasOwnProperty("lonely") || (config.lonely = true,a = false);
-	config.hasOwnProperty("lonelydj") || (config.lonelydj = 1,a = false);
+	config.hasOwnProperty("lonely") || (config.lonely = true,a = true);
+	config.hasOwnProperty("lonelydj") || (config.lonelydj = 1,a = true);
 	a && settings.save();core.lonely = false;
-	lonely.check();
+	if (config.installdone) lonely.check();
 };
 
 lonely.check = function() {
