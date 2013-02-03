@@ -14,6 +14,7 @@ global.Modules = {
  	dynamic:0,  //free
  	econ:   0, //paid
  	lonely: 0, //free
+ 	lyrics: 0, //paid
  	notify: 0, //paid
  	queue:  0, //paid
  	retire: 0, //paid

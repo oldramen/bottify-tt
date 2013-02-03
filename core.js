@@ -23,7 +23,7 @@ String.prototype.isAny = function(a) {
 //Load Plugins/vars
 global.botti = {
 	ttapi: require("ttapi"), util: require("util"), _: require("underscore"), mysql: require("mysql"), twit: require("twit"), 
-	lastfm: require("lastfm").LastFmNode, sys: require('sys'), exec: require('child_process').exec, usedb: true
+	lastfm: require("lastfm").LastFmNode, sys: require('sys'), exec: require('child_process').exec, http: require('http'), usedb: true
 };
 
 //Define Tiers
@@ -33,7 +33,7 @@ global.Tiers = [
 	['queue','limit','dynamic'],      //Tier 2
 	['admin','lonely','notify'], //Tier 3
 	['vips','list','retire'],    //Tier 4
-	['alias','twit','last']      //Tier 4
+	['alias','twit','last','lyrics']      //Tier 4
 ];
 
 //Define Commands

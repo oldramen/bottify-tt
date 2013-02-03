@@ -10,3 +10,4 @@ modules/econ.js
 modules/twit.js
 modules/last.js
 modules/dynamic.js
+modules/lyrics.js

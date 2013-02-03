@@ -288,8 +288,9 @@ basic.parse = function(a, b) {
     .replace("{songtitle}", core.currentsong.name)
     .replace("{up}", core.currentsong.up)
     .replace("{down}", core.currentsong.down)
-    .replace("{thedj}", core.currentdj.name)
     .replace("{heartcount}", core.currentsong.heart);
+    if (core.currentdj) { a = a.replace("{thedj}", core.currentdj.name); }
+    else { a = a.replace("{thedj}", "unknown"); }
     Module.has("limit") && (a = limit.parse(a));
     Module.has("queue") && (a = queue.parse(a));
     Module.has("dynamic") && (a = dynamic.parse(a));
