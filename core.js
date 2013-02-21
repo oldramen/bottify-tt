@@ -4,8 +4,9 @@
  * @description This is the core file, which contains the inner workings.*
  *************************************************************************/
 
-global.Log = function(a) { console.log(config.name, ">>>", a + "."); };function puts(error, stdout, stderr) { sys.puts(stdout) };global.Module = {};Module.loaded = [];
-Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a);Log("Loaded Module: "+a); }; 
+global.Log = function(a) { console.log(config.name, ">>>", a + "."); };global.Emit = function(a,b,c) { Log(a);basic.say(a,b,c); }
+function puts(error, stdout, stderr) { sys.puts(stdout) };global.Module = {};Module.loaded = [];
+Module.load = function(a) { require("./modules/"+a+".js");Module.loaded.push(a); }; 
 global.settings = function(){}; settings.save = function(){  return core.saving = true; };
 Module.has = function(d) { 
   if (d.indexOf("&") > 0) {
@@ -28,7 +29,7 @@ global.botti = {
 
 //Define Tiers
 global.Tiers = [
-	['basic','stats','dj'],           //Tier 0
+	['basic','stats','dj','reco'],           //Tier 0
 	['bans','econ'],             //Tier 1
 	['queue','limit','dynamic'],      //Tier 2
 	['admin','lonely','notify'], //Tier 3
@@ -44,11 +45,10 @@ Log("Connecting to TT");
 global.bot = new botti.ttapi(config.auth, config.uid, config.room);
 Log("Connected");
 
-//Load Tiers
-for (var i=0;i<=Tier;i++) { for (var x=0;x<Tiers[i].length;x++) { Module.load(Tiers[i][x]); }; };
-
 //Load Modules
+for (var i=0;i<=Tier;i++) { for (var x=0;x<Tiers[i].length;x++) { Module.load(Tiers[i][x]); }; };
 for (var x in Modules) { if (Modules[x] == 1) Module.load(x); };
+Log("Loaded "+Module.loaded.length+" Modules");
 
 //Load Files
 botti.install = require("./install.js");botti.db = require("./db.js").db;

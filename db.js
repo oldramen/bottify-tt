@@ -23,9 +23,8 @@ db.create = function(a, b) {
 		client.query('CREATE TABLE settings'
 			+ '(id VARCHAR(255),'
 	    + ' data TEXT)',
-			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err)}
+			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err); }
 		);
-		Log("Created settings table");
 	};
 	if (a == "users" && botti.usedb) {
 		client.query('CREATE TABLE users'
@@ -41,7 +40,6 @@ db.create = function(a, b) {
 	    + ' UNIQUE (id))',
 			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err)}
 		);
-		Log("Created users table");
 	};
 	if (a == "user") {
 		var c = {};
@@ -98,7 +96,6 @@ db.create = function(a, b) {
 	    + ' artist VARCHAR(255))',
 			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err)}
 		);
-		Log("Created songs table");
 	};
 	if (a == "retired" && botti.usedb) {
 		var table = config.file+'_retired';
@@ -108,11 +105,10 @@ db.create = function(a, b) {
       	+ ' name VARCHAR(255))',
 			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err)}
 		);
-		Log("Created retired table");
 	};
 };
 
-db.load = function(a, z) {
+db.load = function(a, z, w) {
 	if (a == "settings" && botti.usedb) {
 		client.query('SELECT data FROM settings WHERE (id = \''+ config.room +'\')',
 			function(a, b, c) {
@@ -131,7 +127,7 @@ db.load = function(a, z) {
 					else {
 						core.user[z.userid] = basic.refreshuser(db.parse(b[0].data), z);
 					};
-					Log("Loaded "+z.name);
+					if (!w) { Log("Loaded "+z.name); }
 				}
 			);
 	  } else {
