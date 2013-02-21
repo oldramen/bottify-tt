@@ -75,6 +75,8 @@ queue.parse = function(a,b) {
 
 queue.more = function(a,b) { config.qued.push(a);settings.save();basic.say(config.msg.queue.add,a,b);bot.emit('queued'); };
 
+queue.vipadd = function(a,b) { config.qued.unshift(a);settings.save();basic.say(config.msg.queue.add,a,b);bot.emit('queued'); };
+
 queue.less = function(a,b) { config.qued.splice(config.qued.indexOf(a), 1);settings.save();basic.say(config.msg.queue.remove,a,b);bot.emit('unqueued'); };
 
 //Hook Events
@@ -92,6 +94,7 @@ queue.commands = [{
 	  if(-1 !== config.qued.indexOf(a)) return basic.say(config.msg.queue.alreadyin, a, b);
 	  if(-1 !== core.djs.indexOf(a)) return basic.say(config.msg.queue.dj, a, b);
 	  if(core.djs.length < core.maxdjs && !config.qued.length) return basic.say(config.on.queue.open, a, b);
+    if(Module.has('vips') && config.vip.queue) return queue.vipadd(a,b);
 	  queue.more(a,b);settings.save();
 	},
   mode: 2,level: 0,bare: true,hint: 'Adds user to the queue'

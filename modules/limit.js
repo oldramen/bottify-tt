@@ -35,7 +35,8 @@ limit.endsong = function() {
 
 limit.waited = function(a) { if (Module.has('queue') && -1 !== config.away.user.indexOf(a.userid)) { return false; }; if(a) { return!a.droppedRoom || a.droppedRoom != config.room || (Date.now() - a.dropped) / 6E4 >= 3 * config.songs.wait ? true : false } };
 
-limit.addsong = function() { ++core.currentdj.count;basic.save(core.currentdj); };
+limit.addsong = function() { if (!core.currentdj) { bot.roomInfo(function(a){ basic.refreshmeta(a);++core.currentdj.count;basic.save(core.currentdj); }); } 
+                             else { ++core.currentdj.count;basic.save(core.currentdj); } };
 
 limit.over = function(a) {
   basic.say(config.on.maxwarn, a.userid);

@@ -36,17 +36,12 @@ bot.on('registered', bans.registered);
 //Define Commands
 bans.commands = [{
   command: 'ban',
-  callback: function(c, a) { 
-  	if(a) { 
-  		console.log(a);
-  		var b = basic.find(a);
-  		console.log(b);
-  		if (b) {
-  			bans.add(b);
-  		}
-  	} 
-  },
+  callback: function(c, a) { if(a) { var b = basic.find(a);if (b) { bans.add(b); } } },
   mode: 2,level: 3,hint: 'ban a user from the room'
+}, {
+  command: 'banbyid',
+  callback: function(a,b,c) { if (b){ config.bans.push(b);basic.say(b+" was added to ban list.",a,c) } },
+  mode: 2,level: 3,hidden:true,hint: 'ban a user from the room'
 }, {
   command: 'bans',
   callback: function(e, d, f) {

@@ -9,6 +9,7 @@ global.vips = function(){};
 
 vips.update = function(){ var a = false;
 	config.hasOwnProperty("vips") || (config.vips = [], a = true);
+	config.hasOwnProperty("vip") || (config.vip = { afk:false,queue:false }, a = true);
 	a && settings.save();
 	commands = botti._.union(commands, vips.commands);
 };

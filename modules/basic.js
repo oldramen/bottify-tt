@@ -75,19 +75,15 @@ basic.remdj = function(b) {
 };
 
 basic.onspeak = function(a) {
-	if (core.setup.on) return install.handlesetup(a.userid, a.text, false);
-	var sUser = core.user[a.userid];
-	var sText = a.text;
-	if(sUser == null) return;
-	basic.updateidle(sUser);
-	basic.save(sUser);
-	if (Module.has('admin')) return;
-	if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) basic.handlecommand(a.userid, sText, false);
+  // if (core.setup.on) return install.handlesetup(a.userid, a.text, false);
+  var sUser = core.user[a.userid];var sText = a.text;if(sUser == null) return;basic.updateidle(sUser);basic.save(sUser);if (Module.has('admin')) return;
+  if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) basic.handlecommand(a.userid, sText, false);
 };
 
 basic.onpmmed = function(a) {
 	if (core.setup.on) return install.handlesetup(a.senderid, a.text, true);
-	basic.handlecommand(a.senderid, a.text, true);
+	var sUser = core.user[a.senderid];var sText = a.text;if(sUser == null) return;basic.updateidle(sUser);basic.save(sUser);
+	if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) basic.handlecommand(a.senderid, sText, true);
 };
 
 basic.newsong = function(a) {
@@ -122,7 +118,7 @@ basic.voted = function(a) {
 
 basic.boot = function() {
   setTimeout(function() { bot.roomInfo(function(a) {
-      a && (core.roomname = a.room.name, botti.db.load("settings"), basic.register(a.users), setTimeout(function() {
+      a && (core.roomname = a.room.name, botti.db.load("settings"), basic.register(a.users, true), setTimeout(function() {
         basic.refreshafks();basic.refreshmeta(a);basic.say(config.on.boot);basic.set();core.booted = true;bot.emit("booted")
       }, 3E3)) })}, 3E3);
   core.looping = setInterval(function() { basic.loop() }, 1E4)
@@ -147,7 +143,10 @@ basic.refreshuser = function(a, b) {
 
 basic.refreshafks = function() { for(var a in core.user) { core.user[a].afk = Date.now() }; };
 
-basic.register = function(b) { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a]) } };
+basic.register = function(b, c) { 
+  if (c) { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a], c) }; Log("Loaded "+b.length+" users") }
+  else { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a]) } }
+};
 
 basic.greet = function(g) {
   core.users.togreet = [];
@@ -175,10 +174,17 @@ basic.loop = function() {
 
 basic.checkafks = function() {
   for(var b = 0;b < core.djs.length;b++) { var a = core.user[core.djs[b]];if(!a || !config.afk.time) { break }
-    var c = (Date.now() - a.afk) / 6E4;c >= config.afk.time && !basic.isbot(core.djs[b]) && basic.afkboot(a);(sWarn = config.afk.warning) || (sWarn = 0.693148 * config.afk.time);
+    var c = (Date.now() - a.afk) / 6E4;c >= config.afk.time && !basic.isbot(core.djs[b]) && !basic.afkvip(a) && basic.afkboot(a);(sWarn = config.afk.warning) || (sWarn = 0.693148 * config.afk.time);
     !a.warned && !basic.isbot(core.djs[b]) && (c >= sWarn && config.afk.warn) && (basic.say(config.on.afkwarn, a.userid), a.warned = true)
   }
 };
+
+basic.afkvip = function(a) {
+  if (!Module.has('vips')) return false;
+  if (!config.vip.afk) return false;
+  if (!vips.check(a.userid)) return false;
+  return true;
+}
 
 basic.afkboot = function(a) { bot.remDj(a.userid);Log(core.user[a.userid].name + " was escorted: afk");basic.say(config.on.afkboot, a.userid) };
 
@@ -203,6 +209,7 @@ basic.refreshdjs = function() {
 
 basic.handlecommand = function(b, c, e, g, h) {
   if(!core.booted) return Log("Not booted, can't do commands");
+  if(b == config.uid) return Log("Silly Rabbit, commans are for kids");
   if(-1 < c.indexOf(" && ")) return basic.handlemultiple(b, c, e);
   if(!c.match(/^[!\*\/]/) && -1 === core.cmds.bare.indexOf(c)) return Log("Can't find the command");
   var d = c.split(" "), f = d.shift().replace(/^[!\*\/]/, "").toLowerCase();
@@ -212,14 +219,9 @@ basic.handlecommand = function(b, c, e, g, h) {
   if(1 > d.length && Module.has("alias")) return alias.check(b, f, e);
   if(!config.installdone && f != 'install') return basic.say("Something hasn't been installed! Type /install to get started!", b, e);
   d.forEach(function(a) {
-    if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) {
-      return Log("Not high enough level to use")
-    }
-    if("hint" == c || "help" == c) {
-      return basic.say("/" + a.command + ": " + a.hint, b)
-    }
-    a.callback(b, c, e);
-    core.user[b] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + c, Log(core.lastcmd))
+    if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) return Log("Not high enough level to use");
+    if("hint" == c || "help" == c) return basic.say("Hint: /" + a.command + ": " + a.hint, b);
+    a.callback(b, c, e);core.user[b] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + c, Log(core.lastcmd))
   });
   h && (core.lastcmd = core.user[b].name + ": /" + h);
   g && (core.mute = false)
@@ -234,14 +236,9 @@ basic.handlemultiple = function(b, c, f, g, h) {
     commands.filter(function(a) {
       return a.command && a.command == k || "object" == typeof a.command && a.command.length && -1 < a.command.indexOf(k)
     }).forEach(function(a) {
-      if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) {
-        return Log("Not high enough level to user")
-      }
-      if("hint" == d || "help" == d) {
-        return basic.say("/" + a.command + ": " + a.hint, b, f)
-      }
-      a.callback(b, d, f, true);
-      core.user[e] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + d, Log(core.lastcmd))
+      if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) return Log("Not high enough level to user");
+      if("hint" == d || "help" == d) return basic.say("/" + a.command + ": " + a.hint, b, f);
+      a.callback(b, d, f, true);core.user[e] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + d, Log(core.lastcmd))
     })
   }
   h && (core.lastcmd = core.user[b].name + ": /" + h);
@@ -306,11 +303,8 @@ basic.parse = function(a, b) {
 
 basic.say = function(a, b, c, d) {
   if(a && (d || !core.mute)) {
-    !config.chat && (!config.pm && b) && bot.pm("Please notify a mod I can't talk right now. They can fix this with /turn [chat/pm] on.", b);
     a = basic.parse(a, b);
-    if(!config.chat && !b) return bot.speak(a);
-    if(c || !config.chat) return bot.pm(a, b);
-    bot.speak(a);
+    if(c && b) { bot.pm(a, b) } else { if (!c) bot.speak(a); }
   }
 };
 
@@ -535,11 +529,12 @@ basic.commands = [,{
   notowner: function(a,b)	{basic.say("Owner only option, sorry.", a, b);},
   callback: function (a, b, c) {
     if (!b) return basic.say(this.hint, a, c);
+    if (Module.has('admin') && config.locked.bot && !basic.isown(a)) return basic.say("Room settings are locked.",a,c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3 = true;var s4;
     if (s1 == 'me') { return basic.say("Oh, stop it you! Be professional!",a,c); }
     else if (s1.isAny('wait|waits|limit|modsongs|smallcount|reup')) {
       if (!Module.has('limit')) return;
-      if (s1.isAny('wait|waits')) s4 = 'config.songs.wait';
+      if (s1.isAny('wait|waits')) s4 = 'config.songs.waits';
       if (s1 == 'limit') s4 = 'config.songs.on';
       if (s1 == 'smallcount') s4 = 'config.songs.small';
       if (s1 == 'reup') s4 = 'config.reup';
@@ -547,6 +542,11 @@ basic.commands = [,{
         if (!basic.isown(a)) return this.notowner(a,c);
         s4 = 'config.modsongs';
       }
+    }
+    else if (s1.isAny('vipqueue|afkvip')) {
+      if (!Module.has('vips')) return;
+      if (s1 == 'vipqueue') s4 = 'config.vip.queue';
+      if (s1 == 'afkvip') s4 = 'config.vip.afk';
     }
     else if (s1.isAny('queue|enforce')) {
       if (!Module.has('queue')) return;
@@ -568,7 +568,7 @@ basic.commands = [,{
       s4 = 'config.dj';
     }
     else if (s1.isAny('wallet|economy|waiter')) {
-      if (!Module.has('economy')) return;
+      if (!Module.has('econ')) return;
       if (!basic.isown(a)) return this.notowner(a,c);
       if (s1 == 'wallet' || s1 == 'economy') s4 = 'config.economy';
       if (s1 == 'waiter') s4 == 'config.waiter';
@@ -603,7 +603,7 @@ basic.commands = [,{
       return basic.say("Turned lonely off and DJ on.",a,c);
     }
     if (s1 == 'lonely' && s2 == 'on' && Module.has('dj')) {
-    	config.dj = false; config.lonely = true; settings.save(); 
+    	config.dj = false; config.lonely = true; settings.save();lonely.check();
       return basic.say("Turned DJ off and lonely on.",a,c);
     }
     if (s2 == 'off') s3 = false;
@@ -615,6 +615,7 @@ basic.commands = [,{
   notowner: function(a,b) {basic.say("Owner only option, sorry.", a, b);},
   callback: function (a, b, c) {
     if (!b) return basic.say(this.hint, a, c);
+    if (Module.has('admin') && config.locked.bot && !basic.isown(a)) return basic.say("Room settings are locked.",a,c);
     var s0 = b.split(' ');var s1 = s0.shift();var s2 = s0.join(' ');var s3;
     if (s1.isAny('limit|mindj|wait|maxwarn|overmax|songremove|reup')) {
       if (!Module.has('limit')) return;
@@ -625,13 +626,15 @@ basic.commands = [,{
       if (s1 == 'overmax') s3 = 'config.on.overmax';
       if (s1 == 'songremove') s3 = 'config.songs.rmv';
       if (s1 == 'reup') s3 = 'config.msg.reup';
-    } else if (s1.isAny('queue.timeout|headsup|nextup|notnext|open')) {
+    } else if (s1.isAny('queue.list|queue.timeout|headsup|nextup|notnext|open|queueoff')) {
       if (!Module.has('queue')) return;
+      if (s1 = 'queue.list') s3 = 'config.msg.queue.users';
       if (s1 == 'queue.timeout') s3 = 'config.queue.timeout';
       if (s1 == 'headsup') s3 = 'config.on.firstinqueue';
       if (s1 == 'nextup') s3 = 'config.on.queue.next';
       if (s1 == 'notnext') s3 = 'config.on.queue.notnext';
       if (s1 == 'open') s3 = 'config.on.queue.open';
+      if (s1 == 'queueoff') s3 = 'config.msg.queue.off';
     } else if (s1.isAny('addvip|remvip')) {
       if (!Module.has('vips')) return;
       if (s1 == 'addvip') s3 = 'config.on.addvip';
@@ -651,7 +654,7 @@ basic.commands = [,{
       if (!Module.has('lonely')) return;
       if (s1 == 'lonelydj') s3 = 'config.lonelydj';
     } else if (s1.isAny('greeting|greeting.user|greeting.mod|greeting.vip|greeting.su|greeting.pm')) {
-      if (Module.has('admin') && config.greeting.locked) return basic.say("Changing the room greet is locked.",a,c);
+      if (Module.has('admin') && config.locked.greeting) return basic.say("Changing the room greet is locked.",a,c);
       if (s1 == 'greeting' || s1 == 'greeting.user') s3 = 'config.greeting.user';
       if (s1 == 'greeting.mod') s3 = 'config.greeting.mod';
       if (s1 == 'greeting.vip') s3 = 'config.greeting.vip';
@@ -699,25 +702,33 @@ basic.commands = [,{
 	},
   mode: 2,level: 3,hint: "Select a user for various things"
 }, {
-  command: 'accept',
+  command: 'confirm',
   callback: function(b, c, a) {
 	  if(core.set.setted && !(b != core.set.setted.userid || !core.set.temp || !core.set.item)) {
-	    clearTimeout(core.set.timeout), "greet" == core.set.item && (core.set.setted.greeting = core.set.temp,
+	    clearTimeout(core.set.timeout),"greet" == core.set.item && (core.set.setted.greeting = core.set.temp,
     	basic.say(core.set.setted.name + "'s greeting is now: " + core.set.setted.greeting, core.set.setted.userid, a),
     	basic.save(core.set.setted)), "local" == core.set.item && (core.set.setted.rgreets[config.room] = core.set.temp,
     	basic.say(core.set.setted.name + "'s local greeting is now: " + core.set.temp, core.set.setted.userid, a), basic.save(core.set.setted)),
     	core.set.using = false,core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null
-	  }
+	  };
+    if("playlist" == core.set.item && Module.has("dj") && b == core.set.setter) {
+      return clearTimeout(core.set.timeout), core.set.using = !1, core.set.setted = null, core.set.setter = null, core.set.temp = null, 
+      core.set.item = null, dj.clearplaylist()
+    };
 	},
-  mode: 2,level: 0,hidden: true,hint: 'accept a greeting'
+  mode: 2,level: 0,hidden: true,hint: 'confirm something'
 }, {
-  command: 'reject',
+  command: 'deny',
   callback: function(a, c, b) {
 	  a != core.set.setted.userid || (!core.set.temp || !core.set.item) || (clearTimeout(core.set.timeout),
   	("greet" == core.set.item || "local" == core.set.item) && basic.say(core.set.setted.name + " denied the greeting.", core.set.setter, b),
-  	core.set.using = false, core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null)
+  	core.set.using = false, core.set.setted = null, core.set.setter = null, core.set.temp = null, core.set.item = null);
+    if("playlist" == core.set.item && Module.has("dj") && b == core.set.setter) {
+      return clearTimeout(core.set.timeout), core.set.using = !1, core.set.setted = null, core.set.setter = null, core.set.temp = null, 
+      core.set.item = null,basic.say("Okay, my queue is safe!",a,b)
+    };
 	},
-  mode: 2,level: 0,hidden: true,hint: 'deny a greeting'
+  mode: 2,level: 0,hidden: true,hint: 'deny something'
 }, {
   command: 'reboot',
   callback: function (a, b, c) { 
