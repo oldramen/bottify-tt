@@ -41,5 +41,5 @@ global.config = {
 	installdone: false
 };
 
-require("../phrases.js");
+require("../modules/phrases.js");
 require("../core.js");

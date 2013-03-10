@@ -1,6 +1,6 @@
-install.js
-db.js
 go.js
+modules/install.js
+modules/db.js
 modules/alias.js
 modules/notify.js
 modules/retire.js
@@ -11,3 +11,4 @@ modules/twit.js
 modules/last.js
 modules/dynamic.js
 modules/lyrics.js
+modules/reco.js

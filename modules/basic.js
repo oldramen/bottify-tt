@@ -1,10 +1,13 @@
-/*************************************************************************
- * @copyright 2012 yayramen.                                             *
- * @author yayramen                                                      *
- * @description This is the basic module                                 *
- *************************************************************************/
+/************************************************************************************************************************************
+ ****META INFORMATION****************************************************************************************************************
+ **                                                                                                                                **
+ **  codef.ly basic.js                                                                                                             **
+ **  (c) 2013 codef.ly, Dalton Gore                                                                                                **
+ **  This is the basic file, outlining the default bot functions.                                                                  **
+ **                                                                                                                                **
+ ************************************************************************************************************************************
+ ************************************************************************************************************************************/
 
-//Define the core object
 global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],left:[],leaving:{},auto:[] },djs:[],nextdj:null,currentdj:null,cmds:{ bare:[],pm:[] },
 	setup:{ on:false,user:null },currentsong:{ name: "",up:-1,down:-1,heart:-1 },set:{ using:false,timeout:null,setter:null,setted:null,temp:null,item:null },
   dives:["{username} is surfing the crowd!","Oops! {username} lost a shoe sufing the crowd.",
@@ -16,7 +19,6 @@ global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],left:[
     "And {username} is surfing the crowd! But why are they shirtless?",
     "{username} just traumatized us all by squashing that poor kid up front."] };
 
-//Define Events
 global.basic = function(){};
 
 basic.update = function() { var a = false;
@@ -77,13 +79,13 @@ basic.remdj = function(b) {
 basic.onspeak = function(a) {
   // if (core.setup.on) return install.handlesetup(a.userid, a.text, false);
   var sUser = core.user[a.userid];var sText = a.text;if(sUser == null) return;basic.updateidle(sUser);basic.save(sUser);if (Module.has('admin')) return;
-  if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) basic.handlecommand(a.userid, sText, false);
+  if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) command.handle(a.userid, sText, false);
 };
 
 basic.onpmmed = function(a) {
 	if (core.setup.on) return install.handlesetup(a.senderid, a.text, true);
 	var sUser = core.user[a.senderid];var sText = a.text;if(sUser == null) return;basic.updateidle(sUser);basic.save(sUser);
-	if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) basic.handlecommand(a.senderid, sText, true);
+	if (a.text.match(/^[!*\/]/) || core.cmds.bare.indexOf(sText) !== -1) command.handle(a.senderid, sText, true);
 };
 
 basic.newsong = function(a) {
@@ -100,7 +102,7 @@ basic.endsong = function() {
   core.currentdj ? (core.currentdj.ups += core.currentsong.up, core.currentdj.downs += core.currentsong.down, basic.save(core.currentdj), basic.say(config.on.endsong, 
   	core.currentdj.userid)) : basic.say(config.on.endsong);
   config.on.endsong && (core.lastsong = basic.parse(config.on.endsong));
-  config.on.endsong || (core.lastsong = basic.parse("{songtitle}: {up} \u2191, {down} \u2193, {heartcount} <3."))
+  config.on.endsong || (core.lastsong = basic.parse("{songtitle}: {up} :point_up:, {down} :point_down:, {heartcount} <3."))
 };
 
 basic.snagged = function(b) {
@@ -144,7 +146,7 @@ basic.refreshuser = function(a, b) {
 basic.refreshafks = function() { for(var a in core.user) { core.user[a].afk = Date.now() }; };
 
 basic.register = function(b, c) { 
-  if (c) { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a], c) }; Log("Loaded "+b.length+" users") }
+  if (c) { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a], c) }; Logg("Loaded "+b.length+" users") }
   else { for(var a = 0;a < b.length;++a) { botti.db.load("user", b[a]) } }
 };
 
@@ -205,44 +207,6 @@ basic.refreshdjs = function() {
     core.djs = a.room.metadata.djs;	
     if (Module.has('lonely')) lonely.check();
   }); 
-};
-
-basic.handlecommand = function(b, c, e, g, h) {
-  if(!core.booted) return Log("Not booted, can't do commands");
-  if(b == config.uid) return Log("Silly Rabbit, commans are for kids");
-  if(-1 < c.indexOf(" && ")) return basic.handlemultiple(b, c, e);
-  if(!c.match(/^[!\*\/]/) && -1 === core.cmds.bare.indexOf(c)) return Log("Can't find the command");
-  var d = c.split(" "), f = d.shift().replace(/^[!\*\/]/, "").toLowerCase();
-  if(!core.user[b]) return Log("Not a user");
-  c = d.join(" ");
-  d = commands.filter(function(a) { return a.command && a.command == f || "object" == typeof a.command && a.command.length && -1 != a.command.indexOf(f) });
-  if(1 > d.length && Module.has("alias")) return alias.check(b, f, e);
-  if(!config.installdone && f != 'install') return basic.say("Something hasn't been installed! Type /install to get started!", b, e);
-  d.forEach(function(a) {
-    if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) return Log("Not high enough level to use");
-    if("hint" == c || "help" == c) return basic.say("Hint: /" + a.command + ": " + a.hint, b);
-    a.callback(b, c, e);core.user[b] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + c, Log(core.lastcmd))
-  });
-  h && (core.lastcmd = core.user[b].name + ": /" + h);
-  g && (core.mute = false)
-};
-
-basic.handlemultiple = function(b, c, f, g, h) {
-  Log("Handling multiple commands");
-  if(!core.user[b]) return Log("Not a user");
-  var e = c.split(" && ");
-  for(c = 0;c < e.length;c++) {
-    var j = e[c].split(" "), k = j.shift().replace(/^[!\*\/]/, "").toLowerCase(), d = j.join(" ");
-    commands.filter(function(a) {
-      return a.command && a.command == k || "object" == typeof a.command && a.command.length && -1 < a.command.indexOf(k)
-    }).forEach(function(a) {
-      if(basic.level(core.user[b]) < a.level && !(g && "say" == a.command)) return Log("Not high enough level to user");
-      if("hint" == d || "help" == d) return basic.say("/" + a.command + ": " + a.hint, b, f);
-      a.callback(b, d, f, true);core.user[e] && (core.lastcmd = core.user[b].name + ": /" + a.command + " " + d, Log(core.lastcmd))
-    })
-  }
-  h && (core.lastcmd = core.user[b].name + ": /" + h);
-  g && (core.mute = false)
 };
 
 basic.addsong = function(a) { ++a.songs;basic.save(a); };
@@ -492,7 +456,11 @@ basic.commands = [,{
   mode: 2,level: 3,hint: 'shows the last used command'
 }, {
   command: 'removeaftersong',
-  callback: function(a, b, c) { if(b = core.user[a]) { b.boot = true, basic.say("Will kick you after your next!", a, c) } },
+  callback: function(a, b, c) { if(b = core.user[a]) { if (!b.boot) { b.boot = true; basic.say("Will kick you after your next!", a, c) } } },
+  mode: 2,level: 0,hint: 'Bot will remove you after your next song.'
+}, {
+  command: 'stayaftersong',
+  callback: function(a, b, c) { if(b = core.user[a]) { if (b.boot) { b.boot = false; basic.say("No longer kicking you after your next!", a, c) } } },
   mode: 2,level: 0,hint: 'Bot will remove you after your next song.'
 }, {
   command: 'pm',
