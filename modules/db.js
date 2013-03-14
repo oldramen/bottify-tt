@@ -22,7 +22,8 @@ db.create = function(a, b) {
 	if (a == "settings" && botti.usedb) {
 		client.query('CREATE TABLE settings'
 			+ '(id VARCHAR(255),'
-	    + ' data TEXT)',
+	    + ' data TEXT,'
+	    + ' name VARCHAR(255))',
 			function (err) {if (err && err.code != 'ER_TABLE_EXISTS_ERROR') throw (err); }
 		);
 	};
@@ -34,6 +35,8 @@ db.create = function(a, b) {
 	    + ' given INT(5),'
 	    + ' songs INT(6),'
 	    + ' wallet INT(9),'
+	    + ' points INT(9),'
+	    + ' fans INT(9),'
 	    + ' ups INT(9),'
 	    + ' downs INT(9),'
 	    + ' data TEXT,'
