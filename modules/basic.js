@@ -10,7 +10,7 @@
 
 global.core = { booted:false,user:{},users:{ togreet:[],tosave:[],mods:[],left:[],leaving:{},auto:[] },djs:[],nextdj:null,currentdj:null,cmds:{ bare:[],pm:[] },
 	setup:{ on:false,user:null },currentsong:{ name: "",up:-1,down:-1,heart:-1 },set:{ using:false,timeout:null,setter:null,setted:null,temp:null,item:null },
-  dives:["{username} is surfing the crowd!","Oops! {username} lost a shoe sufing the crowd.",
+  dives:["{username} is surfing the crowd!","Oops! {username} lost a shoe surfing the crowd.",
     "Wooo! {username}'s surfin' the crowd! Now to figure out where the wheelchair came from...",
     "Well, {username} is surfing the crowd, but where did they get a raft...",
     "{username} dived off the stage...too bad no one in the audience caught them.",
@@ -27,6 +27,7 @@ basic.update = function() { var a = false;
 	config.hasOwnProperty("pm") || (config.pm = true, a = true);config.hasOwnProperty("chat") || (config.chat = true, a = true);
 	config.hasOwnProperty("afk") || (config.afk = { time:15,warning:null,warn:true,bop:true }, a = true);
   config.hasOwnProperty("dives") || (config.dives = core.dives, a = true);
+  config.msg.hasOwnProperty("removedaftersong") || (config.msg.removedaftersong = null, a = true);
 	a && settings.save();
   bot.roomInfo(function(a){ core.maxdjs = a.room.metadata.max_djs; });
 	commands = botti._.union(commands, basic.commands);
@@ -89,7 +90,7 @@ basic.onpmmed = function(a) {
 };
 
 basic.newsong = function(a) {
-	if (core.currentdj && core.currentdj.boot) basic.removedj(core.currentdj);
+	if (core.currentdj && core.currentdj.boot) { basic.removedj(core.currentdj);basic.say(config.msg.removedaftersong, core.currentdj.userid); };
 	core.currentsong.up = 0;core.currentsong.down = 0;core.currentsong.heart = 0;core.currentsong.name = a.room.metadata.current_song.metadata.song;
 	core.currentsong.artist = a.room.metadata.current_song.metadata.artist;core.currentsong.album = a.room.metadata.current_song.metadata.album;
 	core.currentsong.genre = a.room.metadata.current_song.metadata.genre;core.currentsong.id = a.room.metadata.current_song._id;
@@ -648,6 +649,7 @@ basic.commands = [,{
       if (s1 == 'help') s3 = 'config.on.help';
       if (s1 == 'afkwarn') s3 = 'config.on.afkwarn';
       if (s1 == 'afkboot') s3 = 'config.on.afkboot';  
+      if (s1 == 'removed') s3 = 'config.msg.removedaftersong';  
     }    
     if (!s3 || !s2) return basic.say(this.hint, a, c);
     Log("Setting " + s3 + " to have the value of " + s2);basic.say("Setting " + s1 + " to " + s2, a, c);if("off" == s2 || "none" == s2 || "null" == s2) { s2 = null };

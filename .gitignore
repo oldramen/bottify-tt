@@ -1,6 +1,4 @@
 go.js
-modules/install.js
-modules/db.js
 modules/alias.js
 modules/notify.js
 modules/retire.js

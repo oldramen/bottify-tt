@@ -56,6 +56,7 @@ command.execute = function(a,b,c,d,e,f) {
 	z = commands.filter(function(m){ return m.command && m.command == y || "object" == typeof m.command && m.command.length && -1 != m.command.indexOf(y) });
 	if (1 > z.length && Module.has("alias")) return alias.check(a,y,c);
 	z.forEach(function(m) {
+		if (Module.has("admin") && config.pmonly.indexOf(m.command) > -1) c = true;
 		if (basic.level(core.user[a]) < m.level && !(d && "say" == m.command)) return Log("Not high enough level to use");
 		if (b.isAny("hint|help")) return basic.say("Hint: /"+m.command+": "+m.hint,a,c);
 		m.callback(a,b,c,f);core.user[a] && (core.lastcmd = core.user[a].name+": /"+m.command+" "+b,Log(core.lastcmd));
